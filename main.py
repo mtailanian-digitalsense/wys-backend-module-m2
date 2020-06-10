@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
+import jwt
 from flask_swagger import swagger
 from flask_swagger_ui import get_swaggerui_blueprint
 import constants
@@ -138,3 +139,48 @@ def load_config_vars():
 
 
 load_config_vars()
+
+
+def calc_open_plan(hotdesking, workers_number):
+    """
+    Calc the area in m2 for open plan
+    :param hotdesking: Integer number between 70 and 100
+    :param workers_number: Integer number between 0 to 1000
+    :return: area in m2 for open plan spaces
+    """
+    try:
+        op_density = M2InternalConfigVar.query.filter_by(name=constants.DEN_PUESTO_TRABAJO_OPEN).first().value
+        m2 = calc_total_open_plan(hotdesking,workers_number)*float(op_density)
+        return m2
+
+    except Exception as e:
+        app.logger.error(f"calc_open_plan -> Message: {e}")
+        raise e
+
+
+def calc_total_open_plan(hotdesking, workers_number):
+    """
+    Calc the total open plan desks
+    :param hotdesking: Integer number between 70 and 100
+    :param workers_number: Integer number between 0 to 1000
+    :return: Total Open Plan Desks
+    """
+    try:
+        open_plan_factor = M2InternalConfigVar.query\
+                                              .filter_by(name=constants.FACTOR_OPEN_PLAN)\
+                                              .first()\
+                                              .value
+        return open_plan_factor * calc_total_individual_desks(hotdesking, workers_number)
+    except Exception as e:
+        app.logger.error(f"calc_total_open_plan -> Message: {e}")
+        raise e
+
+
+def calc_total_individual_desks(hotdesking, workers_number):
+    """
+    Calc the number of the total individul desks given hotdesking level and number of workers
+    :param hotdesking: Integer number between 70 and 100
+    :param workers_number: Integer number between 0 to 1000
+    :return: the number of total individual desks according to the given parameters
+    """
+    return hotdesking*workers_number/100.0

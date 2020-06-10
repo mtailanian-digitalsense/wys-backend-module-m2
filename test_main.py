@@ -1,9 +1,12 @@
 import unittest
 import os
+import math
+from unittest import TestCase
+
 import constants
 from main import M2InternalCategory, M2InternalSubCategory, \
-                 app, db,load_config_vars, M2InternalConfigVar
-
+    app, db, load_config_vars, M2InternalConfigVar, calc_total_open_plan\
+    ,calc_open_plan
 
 
 class M2InternalCategoryTest(unittest.TestCase):
@@ -13,7 +16,7 @@ class M2InternalCategoryTest(unittest.TestCase):
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + \
-            os.path.join('.', 'test.db')
+                                                os.path.join('.', 'test.db')
         db.create_all()
         sub_cats = [
             M2InternalSubCategory(
@@ -41,7 +44,7 @@ class M2ConfigVarsTest(unittest.TestCase):
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + \
-            os.path.join('.', 'test.db')
+                                                os.path.join('.', 'test.db')
         db.create_all()
 
     def tearDown(self):
@@ -61,6 +64,38 @@ class M2ConfigVarsTest(unittest.TestCase):
         assert total_rows == len(constants.GLOBAL_CONFIG_VARS)
 
 
+class OpenPlanCalcTest(TestCase):
+    def setUp(self):
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + \
+                                                os.path.join('.', 'test.db')
+        db.create_all()
+        load_config_vars()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+
+    def test_calc_total_open_plan(self):
+        total = int(calc_total_open_plan(hotdesking=100, workers_number=100))
+        assert total == 90
+
+        total = int(calc_total_open_plan(hotdesking=70, workers_number=100))
+        assert total == 63
+
+        total = int(calc_total_open_plan(hotdesking=86, workers_number=737))
+        assert total == 570
+
+    def test_calc_open_plan(self):
+        m2 = calc_open_plan(hotdesking=100, workers_number=100)
+        assert m2 == 293.4
+
+        m2 = calc_open_plan(hotdesking=70, workers_number=100)
+        assert m2 == 205.38
+
+        m2 = calc_open_plan(hotdesking=86, workers_number=737)
+        assert abs(m2 - 1859.62788) < 0.0001
 
 if __name__ == '__main__':
     unittest.main()
