@@ -1,29 +1,51 @@
-# README #
+# API Endpoints for M2 module
 
-This README would normally document whatever steps are necessary to get your application up and running.
+Port: 8082
 
-### What is this repository for? ###
+## Calc m2 value, given workers, hotdesking and collaborate grade 
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+**URL** : `/api/m2/new/{project_id}`
 
-### How do I get set up? ###
+**URL Parameters** : `{project_id}=[integer]` where `{project_id}` is the ID of the Project on the server.
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+**Required Body** : 
+```json
+{
+    "hotdesking_level": "HIGH", //HIGH | MID | LOW
+    "colaboration_level": "HIGH", //HIGH | MID | LOW
+    "num_of_workers": 100 //Integer grather than 0.
+} 
+```
+**Method** : `GET`
 
-### Contribution guidelines ###
+**Auth required** : -
 
-* Writing tests
-* Code review
-* Other guidelines
+**Permissions required** : -
 
-### Who do I talk to? ###
+### Success Response
 
-* Repo owner or admin
-* Other community or team contact
+**Code** : `200 OK`
+
+**Content example**
+
+For a project with ID 123 in the local database where that project, the backend return the estimated_area
+
+```json
+{
+    "area": 123.0 //Decimal value
+}
+```
+
+### Error Responses
+
+**Condition** :  If Account does not exist with `id` of provided parameter.
+
+**Code** : `404 NOT FOUND`
+
+**Content** : `{}`
+
+**Condition** :  If server has some error.
+
+**Code** : `500 Internal Error Server`
+
+**Content** : `{}`
