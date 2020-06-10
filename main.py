@@ -141,7 +141,7 @@ def load_config_vars():
 load_config_vars()
 
 
-def calc_open_plan(hotdesking, workers_number):
+def open_plan_m2(hotdesking, workers_number):
     """
     Calc the area in m2 for open plan
     :param hotdesking: Integer number between 70 and 100
@@ -149,8 +149,11 @@ def calc_open_plan(hotdesking, workers_number):
     :return: area in m2 for open plan spaces
     """
     try:
-        op_density = M2InternalConfigVar.query.filter_by(name=constants.DEN_PUESTO_TRABAJO_OPEN).first().value
-        m2 = calc_total_open_plan(hotdesking,workers_number)*float(op_density)
+        op_density = M2InternalConfigVar.query\
+                                        .filter_by(name=constants.DEN_PUESTO_TRABAJO_OPEN)\
+                                        .first()\
+                                        .value
+        m2 = total_open_plan(hotdesking, workers_number) * float(op_density)
         return m2
 
     except Exception as e:
@@ -158,7 +161,7 @@ def calc_open_plan(hotdesking, workers_number):
         raise e
 
 
-def calc_total_open_plan(hotdesking, workers_number):
+def total_open_plan(hotdesking, workers_number):
     """
     Calc the total open plan desks
     :param hotdesking: Integer number between 70 and 100
@@ -170,13 +173,13 @@ def calc_total_open_plan(hotdesking, workers_number):
                                               .filter_by(name=constants.FACTOR_OPEN_PLAN)\
                                               .first()\
                                               .value
-        return open_plan_factor * calc_total_individual_desks(hotdesking, workers_number)
+        return open_plan_factor * total_individual_desks(hotdesking, workers_number)
     except Exception as e:
         app.logger.error(f"calc_total_open_plan -> Message: {e}")
         raise e
 
 
-def calc_total_individual_desks(hotdesking, workers_number):
+def total_individual_desks(hotdesking, workers_number):
     """
     Calc the number of the total individul desks given hotdesking level and number of workers
     :param hotdesking: Integer number between 70 and 100
@@ -184,3 +187,52 @@ def calc_total_individual_desks(hotdesking, workers_number):
     :return: the number of total individual desks according to the given parameters
     """
     return hotdesking*workers_number/100.0
+
+
+def factor_private_office(hotdesking):
+    """
+    Calc the factor private office parameter
+    :param hotdesking: Integer number between 70 and 100
+    :return: A factor that is used to calc the number of private office
+    """
+
+    if hotdesking < 80:
+        factor = 0.0
+
+    elif hotdesking >= 80 and hotdesking < 90:
+        factor = 0.05
+    else:
+        factor = 0.1
+
+    return factor
+
+
+def num_private_office(hotdesking, workers_number):
+    """
+    Calc the num of private office given hotdesking
+    :param hotdesking: Integer number between 70 and 100
+    :param workers_number: Integer number between 0 to 1000
+    :return: Num of private office (float)
+    """
+    return factor_private_office(hotdesking) * total_individual_desks(hotdesking, workers_number)
+
+
+def private_office_m2(hotdesking, workers_number):
+    """
+    Calc the total area used by private offices
+    :param hotdesking: Integer number between 70 and 100
+    :param workers_number: Integer number between 0 to 1000
+    :return: The total area used by private offices
+    """
+    try:
+        po_density = M2InternalConfigVar.query \
+                                        .filter_by(name=constants.DEN_OFICINA_PRIVADA) \
+                                        .first() \
+                                        .value
+
+        return po_density*num_private_office(hotdesking, workers_number)
+
+    except Exception as e:
+        app.logger.error(f"private_office_m2 -> Message: {e}")
+        raise e
+
