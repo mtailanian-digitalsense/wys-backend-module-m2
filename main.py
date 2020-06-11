@@ -119,9 +119,9 @@ def load_config_vars():
     If variable exist, don't change
     """
 
-    total_rows = db.session\
-                   .query(M2InternalConfigVar)\
-                   .count()
+    total_rows = db.session \
+        .query(M2InternalConfigVar) \
+        .count()
 
     # If there are variables in database, do nothing
     if total_rows > 0:
@@ -130,8 +130,8 @@ def load_config_vars():
     # Else put the variables by defect
 
     try:
-        for k,v in constants.GLOBAL_CONFIG_VARS.items():
-            db.session.add(M2InternalConfigVar(name=k,value=v))
+        for k, v in constants.GLOBAL_CONFIG_VARS.items():
+            db.session.add(M2InternalConfigVar(name=k, value=v))
         db.session.commit()
     except Exception as e:
         db.session.rollback()
@@ -149,10 +149,10 @@ def open_plan_m2(hotdesking, workers_number):
     :return: area in m2 for open plan spaces
     """
     try:
-        op_density = M2InternalConfigVar.query\
-                                        .filter_by(name=constants.DEN_PUESTO_TRABAJO_OPEN)\
-                                        .first()\
-                                        .value
+        op_density = M2InternalConfigVar.query \
+            .filter_by(name=constants.DEN_PUESTO_TRABAJO_OPEN) \
+            .first() \
+            .value
         m2 = total_open_plan(hotdesking, workers_number) * float(op_density)
         return m2
 
@@ -169,24 +169,24 @@ def total_open_plan(hotdesking, workers_number):
     :return: Total Open Plan Desks
     """
     try:
-        open_plan_factor = M2InternalConfigVar.query\
-                                              .filter_by(name=constants.FACTOR_OPEN_PLAN)\
-                                              .first()\
-                                              .value
-        return open_plan_factor * total_individual_desks(hotdesking, workers_number)
+        open_plan_factor = M2InternalConfigVar.query \
+            .filter_by(name=constants.FACTOR_OPEN_PLAN) \
+            .first() \
+            .value
+        return open_plan_factor * total_individual_spaces(hotdesking, workers_number)
     except Exception as e:
         app.logger.error(f"calc_total_open_plan -> Message: {e}")
         raise e
 
 
-def total_individual_desks(hotdesking, workers_number):
+def total_individual_spaces(hotdesking, workers_number):
     """
     Calc the number of the total individul desks given hotdesking level and number of workers
     :param hotdesking: Integer number between 70 and 100
     :param workers_number: Integer number between 0 to 1000
     :return: the number of total individual desks according to the given parameters
     """
-    return hotdesking*workers_number/100.0
+    return hotdesking * workers_number / 100.0
 
 
 def factor_private_office(hotdesking):
@@ -199,7 +199,7 @@ def factor_private_office(hotdesking):
     if hotdesking < 80:
         factor = 0.0
 
-    elif hotdesking >= 80 and hotdesking < 90:
+    elif 80 <= hotdesking < 90:
         factor = 0.05
     else:
         factor = 0.1
@@ -214,7 +214,7 @@ def num_private_office(hotdesking, workers_number):
     :param workers_number: Integer number between 0 to 1000
     :return: Num of private office (float)
     """
-    return factor_private_office(hotdesking) * total_individual_desks(hotdesking, workers_number)
+    return factor_private_office(hotdesking) * total_individual_spaces(hotdesking, workers_number)
 
 
 def private_office_m2(hotdesking, workers_number):
@@ -226,13 +226,65 @@ def private_office_m2(hotdesking, workers_number):
     """
     try:
         po_density = M2InternalConfigVar.query \
-                                        .filter_by(name=constants.DEN_OFICINA_PRIVADA) \
-                                        .first() \
-                                        .value
+            .filter_by(name=constants.DEN_OFICINA_PRIVADA) \
+            .first() \
+            .value
 
-        return po_density*num_private_office(hotdesking, workers_number)
+        return po_density * num_private_office(hotdesking, workers_number)
 
     except Exception as e:
         app.logger.error(f"private_office_m2 -> Message: {e}")
         raise e
 
+
+def factor_phonebooth(hotdesking):
+    """
+    Calc the factor phonebooth that helps to calc the number of
+    phonebooths
+    :param hotdesking: Integer number between 70 and 100
+    :return: The factor phonebooth (Float)
+    """
+    try:
+        po_factor = factor_private_office(hotdesking)
+        op_factor = M2InternalConfigVar.query \
+            .filter_by(name=constants.FACTOR_OPEN_PLAN) \
+            .first() \
+            .value
+        return 1-po_factor-op_factor
+    except Exception as e:
+        app.logger.error(f"factor_phonebooth -> Message: {e}")
+        raise e
+
+
+def num_phonebooth(hotdesking, workers_number):
+    """
+    Calc the quantity of phonebooth needed
+    :param hotdesking: Integer number between 70 and 100
+    :param workers_number: Integer number between 0 to 1000
+    :return: The number of phonebooth needed
+    """
+    try:
+        return factor_phonebooth(hotdesking) * total_individual_spaces(hotdesking,workers_number)
+    except Exception as e:
+        app.logger.error(f"num_phonebooth -> Message: {e}")
+        raise e
+
+
+def m2_phonebooth(hotdesking, workers_number):
+    """
+    Calc the area in m2 that is needed of phonebooth spaces
+    given hotdesking level and the number of workers.
+
+    :param hotdesking: Integer number between 70 and 100
+    :param workers_number: Integer number between 0 to 1000
+    :return: Total phonebooth area.
+    """
+    try:
+        pb_density = M2InternalConfigVar.query \
+            .filter_by(name=constants.DEN_PHONEBOOTH) \
+            .first() \
+            .value
+        return num_phonebooth(hotdesking, workers_number) * pb_density
+    except Exception as e:
+        app.logger.error(f"m2_phonebooth -> Message: {e}")
+        raise e

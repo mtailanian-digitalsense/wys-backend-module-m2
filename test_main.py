@@ -6,7 +6,8 @@ from unittest import TestCase
 import constants
 from main import M2InternalCategory, M2InternalSubCategory, \
     app, db, load_config_vars, M2InternalConfigVar, total_open_plan\
-    ,open_plan_m2, num_private_office, private_office_m2
+    ,open_plan_m2, num_private_office, private_office_m2, \
+    factor_phonebooth, num_phonebooth, m2_phonebooth
 
 
 class M2InternalCategoryTest(unittest.TestCase):
@@ -118,6 +119,36 @@ class M2LogicCalcTest(TestCase):
 
         m2 = private_office_m2(86, 737)
         assert abs(m2 - 378.0736300) < self.TOLERANCE
+
+    def test_factor_phonebooth(self):
+        factor = factor_phonebooth(100)
+        assert abs(factor - 0.00) < self.TOLERANCE
+
+        factor = factor_phonebooth(70)
+        assert abs(factor - 0.1) < self.TOLERANCE
+
+        factor = factor_phonebooth(86)
+        assert abs(factor - 0.05) < self.TOLERANCE
+
+    def test_num_phonebooth(self):
+        num = int(round(num_phonebooth(100, 100)))
+        assert abs(num - 0.00) < self.TOLERANCE
+
+        num = int(round(num_phonebooth(70, 100)))
+        assert abs(num - 7) < self.TOLERANCE
+
+        num = int(round(num_phonebooth(86, 737)))
+        assert abs(num - 32) < self.TOLERANCE
+
+    def test_m2_phonebooth(self):
+        m2 = m2_phonebooth(100, 100)
+        assert abs(m2 - 0.00) < self.TOLERANCE
+
+        m2 = m2_phonebooth(70, 100)
+        assert abs(m2 - 21.28) < self.TOLERANCE
+
+        m2 = m2_phonebooth(86, 737)
+        assert abs(m2 - 96.3406400) < self.TOLERANCE
 
 
 if __name__ == '__main__':
