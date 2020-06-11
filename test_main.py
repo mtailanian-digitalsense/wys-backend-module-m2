@@ -7,7 +7,7 @@ import constants
 from main import M2InternalCategory, M2InternalSubCategory, \
     app, db, load_config_vars, M2InternalConfigVar, total_open_plan\
     ,open_plan_m2, num_private_office, private_office_m2, \
-    factor_phonebooth, num_phonebooth, m2_phonebooth
+    factor_phonebooth, num_phonebooth, m2_phonebooth, collaborative_spaces,m2_informal_collaborative
 
 
 class M2InternalCategoryTest(unittest.TestCase):
@@ -149,6 +149,26 @@ class M2LogicCalcTest(TestCase):
 
         m2 = m2_phonebooth(86, 737)
         assert abs(m2 - 96.3406400) < self.TOLERANCE
+
+    def test_collaborative_spaces(self):
+        num = int(round(collaborative_spaces(100, 50, 100)))
+        assert num == 100
+
+        num = int(round(collaborative_spaces(70, 30, 100)))
+        assert num == 30
+
+        num = int(round(collaborative_spaces(87, 40, 737)))
+        assert num == 427
+
+    def test_m2_informal_collaborative(self):
+        m2 = m2_informal_collaborative(100, 50, 100)
+        assert abs(m2 - 75.50) < self.TOLERANCE
+
+        m2 = m2_informal_collaborative(70, 50, 100)
+        assert abs(m2 - 52.85) < self.TOLERANCE
+
+        m2 = m2_informal_collaborative(87, 40, 737)
+        assert abs(m2 - 193.63938) < self.TOLERANCE
 
 
 if __name__ == '__main__':

@@ -250,7 +250,7 @@ def factor_phonebooth(hotdesking):
             .filter_by(name=constants.FACTOR_OPEN_PLAN) \
             .first() \
             .value
-        return 1-po_factor-op_factor
+        return 1 - po_factor - op_factor
     except Exception as e:
         app.logger.error(f"factor_phonebooth -> Message: {e}")
         raise e
@@ -264,7 +264,7 @@ def num_phonebooth(hotdesking, workers_number):
     :return: The number of phonebooth needed
     """
     try:
-        return factor_phonebooth(hotdesking) * total_individual_spaces(hotdesking,workers_number)
+        return factor_phonebooth(hotdesking) * total_individual_spaces(hotdesking, workers_number)
     except Exception as e:
         app.logger.error(f"num_phonebooth -> Message: {e}")
         raise e
@@ -287,4 +287,66 @@ def m2_phonebooth(hotdesking, workers_number):
         return num_phonebooth(hotdesking, workers_number) * pb_density
     except Exception as e:
         app.logger.error(f"m2_phonebooth -> Message: {e}")
+        raise e
+
+
+def collaborative_spaces(hotdesking, grade_of_collaboration, workers_number):
+    """
+    Calc the total of collaborative spaces
+
+    :param grade_of_collaboration: Integer between 30 and 50
+    :param hotdesking: Integer number between 70 and 100
+    :param workers_number: Integer number between 0 to 1000
+    :return number of total of collaborative spaces
+    """
+    num_ind_spaces = total_individual_spaces(hotdesking=hotdesking, workers_number=workers_number)
+    return (grade_of_collaboration * num_ind_spaces * 1.0)/(100.0 - grade_of_collaboration)
+
+
+def factor_formal_collaborative(grade_of_collaboration):
+    """
+    Calc the formal collaborative factor
+    :param grade_of_collaboration: Integer between 30 and 50
+    :return formal collaborative factor
+    """
+    if grade_of_collaboration < 37:
+        return 0.9
+    elif 37 <= grade_of_collaboration < 43:
+        return 0.7
+    else:
+        return 0.5
+
+
+def num_informal_collaborative(hotdesking, grade_of_collaboration, workers_number):
+    """
+    Calc the total of informal collaboratives spaces
+
+    :param grade_of_collaboration: Integer between 30 and 50
+    :param hotdesking: Integer number between 70 and 100
+    :param workers_number: Integer number between 0 to 1000
+    :return number of total informal collaborative spaces
+    """
+    num_col_spaces = collaborative_spaces(hotdesking, grade_of_collaboration, workers_number)
+    return num_col_spaces * (1-factor_formal_collaborative(grade_of_collaboration))
+
+
+def m2_informal_collaborative(hotdesking, grade_of_collaboration, workers_number):
+    """
+        Calc the total area of informal collaboratives spaces
+
+        :param grade_of_collaboration: Integer between 30 and 50
+        :param hotdesking: Integer number between 70 and 100
+        :param workers_number: Integer number between 0 to 1000
+        :return total area informal collaborative spaces
+    """
+    num_inf_col = num_informal_collaborative(hotdesking, grade_of_collaboration, workers_number)
+    try:
+        ic_density = M2InternalConfigVar.query \
+            .filter_by(name=constants.DEN_COLABORATIVO_INFORMAL) \
+            .first() \
+            .value
+        return num_inf_col * ic_density
+
+    except Exception as e:
+        app.logger.error(f"m2_informal_collaborative -> Message: {e}")
         raise e
