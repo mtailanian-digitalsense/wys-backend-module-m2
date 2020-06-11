@@ -4,15 +4,13 @@ Port: 8082
 
 ## Calc m2 value, given workers, hotdesking and collaborate grade 
 
-**URL** : `/api/m2/new/{project_id}`
-
-**URL Parameters** : `{project_id}=[integer]` where `{project_id}` is the ID of the Project on the server.
+**URL** : `/api/m2`
 
 **Required Body** : 
 ```json
 {
-    "hotdesking_level": "HIGH", //HIGH | MID | LOW
-    "colaboration_level": "HIGH", //HIGH | MID | LOW
+    "hotdesking_level": 75, //Integer between 70 and 100
+    "colaboration_level": 40, //Integer between 30 and 50
     "num_of_workers": 100 //Integer grather than 0.
 } 
 ```
@@ -38,14 +36,8 @@ For a project with ID 123 in the local database where that project, the backend 
 
 ### Error Responses
 
-**Condition** :  If Account does not exist with `id` of provided parameter.
-
-**Code** : `404 NOT FOUND`
-
-**Content** : `{}`
-
 **Condition** :  If server has some error.
 
 **Code** : `500 Internal Error Server`
 
-**Content** : `{}`
+**Content** : `{error_message}`

@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, abort, request
 from flask_sqlalchemy import SQLAlchemy
 import constants
+import logging
 
 import os
 
@@ -13,6 +14,8 @@ DB_SCHEMA = os.getenv('DB_SCHEMA', 'wys')
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql://{DB_USER}:{DB_PASS}@{DB_IP}:{DB_PORT}/{DB_SCHEMA}"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.logger.setLevel(logging.DEBUG)
 db = SQLAlchemy(app)
 
 
