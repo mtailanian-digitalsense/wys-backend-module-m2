@@ -20,6 +20,7 @@ class MainTest(unittest.TestCase):
 
     def test_get_m2_value(self):
         with app.test_client() as client:
+            client.environ_base['HTTP_AUTHORIZATION'] = jwt.encode({'some': 'payload'}, app.config['SECRET_KEY'], algorithm='HS256')
             sent = {'hotdesking_level': 75, 'colaboration_level': 40, 'num_of_workers': 100}
             rv = client.get('/api/m2', data = json.dumps(sent), content_type='application/json')
             self.assertEqual(rv.status_code, 200)
