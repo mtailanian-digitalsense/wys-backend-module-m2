@@ -337,7 +337,7 @@ def m2_informal_collaborative(hotdesking, grade_of_collaboration, workers_number
         :param grade_of_collaboration: Integer between 30 and 50
         :param hotdesking: Integer number between 70 and 100
         :param workers_number: Integer number between 0 to 1000
-        :return total area informal collaborative spaces
+        :return: total area informal collaborative spaces
     """
     num_inf_col = num_informal_collaborative(hotdesking, grade_of_collaboration, workers_number)
     try:
@@ -350,3 +350,36 @@ def m2_informal_collaborative(hotdesking, grade_of_collaboration, workers_number
     except Exception as e:
         app.logger.error(f"m2_informal_collaborative -> Message: {e}")
         raise e
+
+
+def num_formal_collaborative(hotdesking, grade_of_collaboration, workers_number):
+    """
+    Calc total of formal collaboratives spaces
+    :param grade_of_collaboration: Integer between 30 and 50
+    :param hotdesking: Integer number between 70 and 100
+    :param workers_number: Integer number between 0 to 1000
+    :return: total formal collaboratives spaces
+    """
+    ffc = factor_formal_collaborative(grade_of_collaboration)
+    total_collaborative = collaborative_spaces(hotdesking, grade_of_collaboration, workers_number)
+    return ffc * total_collaborative
+
+
+def m2_formal_collaborative(hotdesking, grade_of_collaboration, workers_number):
+    """
+    Calc total area of formal collaboratives spaces
+    :param grade_of_collaboration: Integer between 30 and 50
+    :param hotdesking: Integer number between 70 and 100
+    :param workers_number: Integer number between 0 to 1000
+    :return: total area of formal collaboratives spaces
+    """
+    try:
+        den_col_form = M2InternalConfigVar.query \
+            .filter_by(name=constants.DEN_COLABORATIVO_FORMAL) \
+            .first() \
+            .value
+        return den_col_form * num_formal_collaborative(hotdesking, grade_of_collaboration, workers_number)
+    except Exception as e:
+        app.logger.error(f"m2_informal_collaborative -> Message: {e}")
+        raise e
+

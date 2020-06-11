@@ -5,9 +5,10 @@ from unittest import TestCase
 
 import constants
 from main import M2InternalCategory, M2InternalSubCategory, \
-    app, db, load_config_vars, M2InternalConfigVar, total_open_plan\
-    ,open_plan_m2, num_private_office, private_office_m2, \
-    factor_phonebooth, num_phonebooth, m2_phonebooth, collaborative_spaces,m2_informal_collaborative
+    app, db, load_config_vars, M2InternalConfigVar, total_open_plan, \
+    open_plan_m2, num_private_office, private_office_m2, \
+    factor_phonebooth, num_phonebooth, m2_phonebooth, collaborative_spaces, m2_informal_collaborative, \
+    m2_formal_collaborative
 
 
 class M2InternalCategoryTest(unittest.TestCase):
@@ -170,6 +171,15 @@ class M2LogicCalcTest(TestCase):
         m2 = m2_informal_collaborative(87, 40, 737)
         assert abs(m2 - 193.63938) < self.TOLERANCE
 
+    def test_m2_formal_collaborative(self):
+        m2 = m2_formal_collaborative(100, 50, 100)
+        assert abs(m2 - 104.00) < self.TOLERANCE
+
+        m2 = m2_formal_collaborative(70, 30, 100)
+        assert abs(m2 - 56.16) < self.TOLERANCE
+
+        m2 = m2_formal_collaborative(87, 40, 737)
+        assert abs(m2 - 622.38176) < self.TOLERANCE
 
 if __name__ == '__main__':
     unittest.main()
