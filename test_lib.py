@@ -6,9 +6,9 @@ from unittest import TestCase
 import constants
 from lib import M2InternalCategory, M2InternalSubCategory, \
     app, db, load_config_vars, M2InternalConfigVar, total_open_plan, \
-    open_plan_m2, num_private_office, private_office_m2, \
+    m2_open_plan, num_private_office, m2_private_office, \
     factor_phonebooth, num_phonebooth, m2_phonebooth, collaborative_spaces, m2_informal_collaborative, \
-    m2_formal_collaborative
+    m2_formal_collaborative, m2_support
 
 
 class M2InternalCategoryTest(unittest.TestCase):
@@ -91,13 +91,13 @@ class M2LogicCalcTest(TestCase):
         assert total == 570
 
     def test_calc_open_plan(self):
-        m2 = open_plan_m2(hotdesking=100, workers_number=100)
+        m2 = m2_open_plan(hotdesking=100, workers_number=100)
         assert m2 == 293.4
 
-        m2 = open_plan_m2(hotdesking=70, workers_number=100)
+        m2 = m2_open_plan(hotdesking=70, workers_number=100)
         assert m2 == 205.38
 
-        m2 = open_plan_m2(hotdesking=86, workers_number=737)
+        m2 = m2_open_plan(hotdesking=86, workers_number=737)
 
         assert abs(m2 - 1859.62788) < self.TOLERANCE
 
@@ -112,13 +112,13 @@ class M2LogicCalcTest(TestCase):
         assert total == 32
 
     def test_private_office_m2(self):
-        m2 = private_office_m2(100, 100)
+        m2 = m2_private_office(100, 100)
         assert abs(m2 - 119.3) < self.TOLERANCE
 
-        m2 = private_office_m2(70, 100)
+        m2 = m2_private_office(70, 100)
         assert abs(m2 - 0.0) < self.TOLERANCE
 
-        m2 = private_office_m2(86, 737)
+        m2 = m2_private_office(86, 737)
         assert abs(m2 - 378.0736300) < self.TOLERANCE
 
     def test_factor_phonebooth(self):
@@ -179,6 +179,16 @@ class M2LogicCalcTest(TestCase):
         assert abs(m2 - 56.16) < self.TOLERANCE
 
         m2 = m2_formal_collaborative(87, 40, 737)
+        assert abs(m2 - 622.38176) < self.TOLERANCE
+
+    def test_m2_support(self):
+        m2 = m2_support(100, 100)
+        assert abs(m2 - 104.00) < self.TOLERANCE
+
+        m2 = m2_support(70, 100)
+        assert abs(m2 - 56.16) < self.TOLERANCE
+
+        m2 = m2_support(87, 737)
         assert abs(m2 - 622.38176) < self.TOLERANCE
 
 if __name__ == '__main__':

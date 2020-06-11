@@ -138,7 +138,7 @@ def load_config_vars():
 load_config_vars()
 
 
-def open_plan_m2(hotdesking, workers_number):
+def m2_open_plan(hotdesking, workers_number):
     """
     Calc the area in m2 for open plan
     :param hotdesking: Integer number between 70 and 100
@@ -214,7 +214,7 @@ def num_private_office(hotdesking, workers_number):
     return factor_private_office(hotdesking) * total_individual_spaces(hotdesking, workers_number)
 
 
-def private_office_m2(hotdesking, workers_number):
+def m2_private_office(hotdesking, workers_number):
     """
     Calc the total area used by private offices
     :param hotdesking: Integer number between 70 and 100
@@ -380,3 +380,27 @@ def m2_formal_collaborative(hotdesking, grade_of_collaboration, workers_number):
         app.logger.error(f"m2_informal_collaborative -> Message: {e}")
         raise e
 
+
+def m2_support(hotdesking, workers_number):
+    """
+    Calc the total area of support spaces
+    :param hotdesking: Integer number between 70 and 100
+    :param workers_number: Integer number between 0 to 1000
+    :return: total area of soporte spaces
+    """
+    try:
+        private_office = m2_private_office(hotdesking, workers_number)
+        open_plan = m2_open_plan(hotdesking, workers_number)
+        den_support = M2InternalConfigVar.query \
+            .filter_by(name=constants.DEN_SOPORTE) \
+            .first() \
+            .value
+        use_percent = (den_support * 100.0) / (100 - (den_support * 100))
+        return (private_office + open_plan) * use_percent
+
+    except Exception as e:
+        app.logger.error(f"m2_soporte -> Message: {e}")
+        raise e
+
+def area_calc(hotdesking, grade_of_collaboration, workers_number):
+    return 123.456
