@@ -4,7 +4,7 @@ import math
 from unittest import TestCase
 
 import constants
-from main import M2InternalCategory, M2InternalSubCategory, \
+from lib import M2InternalCategory, M2InternalSubCategory, \
     app, db, load_config_vars, M2InternalConfigVar, total_open_plan, \
     open_plan_m2, num_private_office, private_office_m2, \
     factor_phonebooth, num_phonebooth, m2_phonebooth, collaborative_spaces, m2_informal_collaborative, \
