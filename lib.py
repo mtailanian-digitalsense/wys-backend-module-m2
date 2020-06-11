@@ -395,12 +395,49 @@ def m2_support(hotdesking, workers_number):
             .filter_by(name=constants.DEN_SOPORTE) \
             .first() \
             .value
-        use_percent = (den_support * 100.0) / (100 - (den_support * 100))
+        use_percent = den_support / (100.0 - den_support)
         return (private_office + open_plan) * use_percent
 
     except Exception as e:
         app.logger.error(f"m2_soporte -> Message: {e}")
         raise e
 
+
+def m2_circulations(hotdesking, workers_number):
+    """
+    Calc the total area of circulation spaces
+    :param hotdesking: Integer number between 70 and 100
+    :param workers_number: Integer number between 0 to 1000
+    :return: total area of soporte spaces
+    """
+    try:
+        private_office = m2_private_office(hotdesking, workers_number)
+        open_plan = m2_open_plan(hotdesking, workers_number)
+        den_circ = M2InternalConfigVar.query \
+            .filter_by(name=constants.DEN_CIRCULACIONES) \
+            .first() \
+            .value
+        use_percent = den_circ / (100.0 - den_circ)
+    except Exception as e:
+        app.logger.error(f"m2_circulations -> Message: {e}")
+        raise e
+
+    return (private_office + open_plan + m2_support(hotdesking, workers_number)) * use_percent
+
+
 def area_calc(hotdesking, grade_of_collaboration, workers_number):
-    return 123.456
+    """
+    Calc the total area given hotdesking level, grade of collaboration and number of workers
+    :param hotdesking: Integer number between 70 and 100
+    :param grade_of_collaboration: Integer between 30 and 50
+    :param workers_number: workers_number: Integer number between 0 to 1000
+    :return: Total area needed
+    """
+
+    return m2_support(hotdesking, workers_number) + \
+           m2_circulations(hotdesking, workers_number) + \
+           m2_private_office(hotdesking, workers_number) + \
+           m2_open_plan(hotdesking, workers_number) + \
+           m2_phonebooth(hotdesking, workers_number) + \
+           m2_formal_collaborative(hotdesking, grade_of_collaboration, workers_number) + \
+           m2_informal_collaborative(hotdesking, grade_of_collaboration, workers_number)

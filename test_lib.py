@@ -8,7 +8,7 @@ from lib import M2InternalCategory, M2InternalSubCategory, \
     app, db, load_config_vars, M2InternalConfigVar, total_open_plan, \
     m2_open_plan, num_private_office, m2_private_office, \
     factor_phonebooth, num_phonebooth, m2_phonebooth, collaborative_spaces, m2_informal_collaborative, \
-    m2_formal_collaborative, m2_support
+    m2_formal_collaborative, m2_support, m2_circulations, area_calc
 
 
 class M2InternalCategoryTest(unittest.TestCase):
@@ -183,13 +183,34 @@ class M2LogicCalcTest(TestCase):
 
     def test_m2_support(self):
         m2 = m2_support(100, 100)
-        assert abs(m2 - 104.00) < self.TOLERANCE
+        assert abs(m2 - 72.82941176470590000) < self.TOLERANCE
 
         m2 = m2_support(70, 100)
-        assert abs(m2 - 56.16) < self.TOLERANCE
+        assert abs(m2 - 36.24352941176470000) < self.TOLERANCE
 
         m2 = m2_support(87, 737)
-        assert abs(m2 - 622.38176) < self.TOLERANCE
+        assert abs(m2 - 399.48022852941200000) < self.TOLERANCE
+
+    def test_m2_circulations(self):
+        m2 = m2_circulations(100, 100)
+        assert abs(m2 - 261.4389140271490000) < self.TOLERANCE
+
+        m2 = m2_circulations(70, 100)
+        assert abs(m2 - 130.1049773755660000) < self.TOLERANCE
+
+        m2 = m2_circulations(87, 737)
+        assert abs(m2 - 1434.0315895927600000) < self.TOLERANCE
+
+    def test_area_calc(self):
+        m2 = area_calc(100, 50, 100)
+        assert abs(m2 - 926.4683257918550) < self.TOLERANCE
+
+        m2 = area_calc(70, 30, 100)
+        assert abs(m2 - 453.6985067873300) < self.TOLERANCE
+
+        m2 = area_calc(87, 40, 737)
+        assert abs(m2 - 5010.7151331221700) < self.TOLERANCE
+
 
 if __name__ == '__main__':
     unittest.main()
