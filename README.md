@@ -14,11 +14,9 @@ Port: 8082
     "num_of_workers": 100 //Integer grather than 0.
 } 
 ```
-**Method** : `GET`
+**Method** : `POST`
 
-**Auth required** : -
-
-**Permissions required** : -
+**Auth required** : YES
 
 ### Success Response
 

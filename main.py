@@ -42,7 +42,7 @@ def token_required(f):
 def spec():
     return jsonify(swagger(app))
 
-@app.route('/api/m2', methods = ['GET'])
+@app.route('/api/m2', methods = ['POST'])
 @token_required
 def get_m2_value():
     """
