@@ -8,8 +8,8 @@ app.config['SECRET_KEY']= 'Th1s1ss3cr3t'
 
 # Swagger Config
 
-SWAGGER_URL = '/api/docs/'
-API_URL = '/api/spec'
+SWAGGER_URL = '/api/m2/docs/'
+API_URL = '/api/m2/spec'
 swaggerui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
@@ -37,7 +37,7 @@ def token_required(f):
         return f(*args,  **kwargs)
     return decorator
 
-@app.route("/api/spec", methods=['GET'])
+@app.route("/api/m2/spec", methods=['GET'])
 @token_required
 def spec():
     return jsonify(swagger(app))
