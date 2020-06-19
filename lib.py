@@ -18,82 +18,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.logger.setLevel(logging.DEBUG)
 db = SQLAlchemy(app)
 
-
-class M2InternalCategory(db.Model):
-    """
-    M2InternalCategory.
-    Represent a Internal Categories of Spaces that are used to calc the final area.
-
-    Attributes
-    ----------
-    id: Represent the unique id of a Internal Category
-    name: Name of a Internal Category
-    subcategories: Subcategories associated to this category (One to Many)
-    """
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120))
-    sub_categories = db.relationship(
-        "M2InternalSubCategory",
-        backref="m2_internal_category")
-
-    def serialize(self):
-        """
-        Serialize to json
-        """
-        return jsonify(self.to_dict())
-
-    def to_dict(self):
-        """
-        Convert to dictionary
-        """
-
-        sub_categories_dicts = [sub_category.to_dict()
-                                for sub_category in self.sub_categories]
-
-        obj_dict = {
-            'id': self.id,
-            'name': self.name,
-            'sub_categories': sub_categories_dicts}
-
-        return obj_dict
-
-
-class M2InternalSubCategory(db.Model):
-    """
-    M2InternalSubCategories.
-    Represent a Internal SubCategories of Spaces that are used to calc the final area.
-
-    Attributes
-    ----------
-    id: Represent the unique id of a Internal SubCategory
-    name: Name of a Internal Category
-    category_id: Parent Category's ID (Many to One)
-    """
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120))
-    density = db.Column(db.Float)
-    category_id = db.Column(db.Integer, db.ForeignKey(
-        'm2_internal_category.id'), nullable=False)
-
-    def serialize(self):
-        """
-        Serialize to json
-        """
-        return jsonify(self.to_dict())
-
-    def to_dict(self):
-        """
-        Convert to dictionary
-        """
-        return {
-            'id': self.id,
-            'name': self.name,
-            'density': self.density,
-            'category_id': self.category_id
-        }
-
-
 class M2InternalConfigVar(db.Model):
     """
     M2InternalConfigVar.
@@ -109,9 +33,7 @@ class M2InternalConfigVar(db.Model):
     name = db.Column(db.String(120))
     value = db.Column(db.Float)
 
-
 db.create_all()  # Create all tables
-
 
 def load_config_vars():
     """
