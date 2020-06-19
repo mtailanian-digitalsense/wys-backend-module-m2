@@ -1,10 +1,39 @@
 import jwt
+import requests
 from lib import app, db, abort, jsonify, request, area_calc
 from flask_swagger import swagger
 from flask_swagger_ui import get_swaggerui_blueprint
 from functools import wraps
 
+# Loading Config Parameters
+APP_HOST = os.getenv('APP_HOST', '127.0.0.1')
+APP_PORT = os.getenv('APP_PORT', 5001)
+SPACES_MODULE_HOST = os.getenv('SPACES_MODULE_IP', '127.0.0.1')
+SPACES_MODULE_PORT = os.getenv('SPACES_MODULE_PORT', 5002)
+
 app.config['SECRET_KEY']= 'Th1s1ss3cr3t'
+
+
+class M2Generated(db.Model):
+    """
+    M2Generated.
+    Represents the values configured by the user and calculated according to them.
+
+    Attributes
+    ----------
+    id: Represent the unique id of a M2 generated
+    hot_desking_level: Value of Hot Desking Level
+    collaborative_level: Value of the Collaborative Level
+    workers_num: Value of Workers number
+    area: Value of calculated Area
+    density: Area density value
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    hot_desking_level = db.Column(db.Integer, nullable=False)
+    collaborative_level = db.Column(db.Integer, nullable=False)
+    workers_num = db.Column(db.Integer, nullable=False)
+    area = db.Column(db.Float, nullable=False)
+    density = db.Column(db.Float, nullable=False)
 
 # Swagger Config
 
@@ -74,12 +103,16 @@ def get_m2_value():
         if(area):
             return jsonify({'area': area}), 200
 
-        return jsonify({'message': "Error, it was possible to calculate the area. Try again."}), 500
+        return jsonify({'message': "Error, the area could not be calculated. Try again."}), 500
     
     except Exception as exp:
         app.logger.error(f"Error in database: mesg ->{exp}")
         return exp, 500
 
+@app.route('/api/m2/generate', methods = ['POST'])
+@token_required
+def generate_workspace():
+    pass
+
 if __name__ == '__main__':
-    app.run()
-    app.debug = True
+    app.run(host= APP_HOST, port = APP_PORT, debug = True)
