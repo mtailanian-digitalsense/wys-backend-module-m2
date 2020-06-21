@@ -10,7 +10,7 @@ Port: 8082
 ```json
 {
     "hotdesking_level": 75, //Integer between 70 and 100
-    "colaboration_level": 40, //Integer between 30 and 50
+    "collaboration_level": 40, //Integer between 30 and 50
     "num_of_workers": 100 //Integer grather than 0.
 } 
 ```

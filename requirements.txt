@@ -5,3 +5,4 @@ flask_swagger_ui
 mysqlclient
 pyjwt
 gunicorn
+cryptography
