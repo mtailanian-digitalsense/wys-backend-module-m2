@@ -241,7 +241,7 @@ def generate_workspaces():
         abort(400)
         
     try:
-        token = jwt.encode({'some': 'payload'}, app.config['SECRET_KEY'], algorithm='HS256')
+        token = request.headers.get('Authorization', None)
         headers = {'Authorization': token}
         api_url = 'http://'+ SPACES_MODULE_HOST + ':' + str(SPACES_MODULE_PORT) + SPACES_MODULE_API_CREATE
         rv = requests.get(api_url, headers=headers)

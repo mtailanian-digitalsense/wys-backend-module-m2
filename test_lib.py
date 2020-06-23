@@ -4,42 +4,11 @@ import math
 from unittest import TestCase
 
 import constants
-from lib import M2InternalCategory, M2InternalSubCategory, \
+from lib import \
     app, db, load_config_vars, M2InternalConfigVar, total_open_plan, \
     m2_open_plan, num_private_office, m2_private_office, \
     factor_phonebooth, num_phonebooth, m2_phonebooth, collaborative_spaces, m2_informal_collaborative, \
     m2_formal_collaborative, m2_support, m2_circulations, area_calc
-
-
-class M2InternalCategoryTest(unittest.TestCase):
-    NUM_SUB_CAT = 10
-
-    def setUp(self):
-        app.config['TESTING'] = True
-        app.config['WTF_CSRF_ENABLED'] = False
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + \
-                                                os.path.join('.', 'test.db')
-        db.create_all()
-        sub_cats = [
-            M2InternalSubCategory(
-                id=n,
-                name=f"TEST{n}",
-                category_id=n,
-                density=float(f"{n}.{n}")) for n in range(self.NUM_SUB_CAT)]
-
-        self.category = M2InternalCategory(name="TESTCAT1", id=1)
-
-        for sub_cat in sub_cats:
-            self.category.sub_categories.append(sub_cat)
-
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-
-    def test_to_dict(self):
-        obj_dict = self.category.to_dict()
-        assert len(obj_dict["sub_categories"]) == self.NUM_SUB_CAT
-
 
 class M2ConfigVarsTest(unittest.TestCase):
     def setUp(self):
