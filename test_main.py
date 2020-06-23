@@ -25,5 +25,11 @@ class MainTest(unittest.TestCase):
             rv = client.post('/api/m2', data = json.dumps(sent), content_type='application/json')
             self.assertEqual(rv.status_code, 200)
 
+    def test_get_generate_workspaces(self):
+        with app.test_client() as client:
+            client.environ_base['HTTP_AUTHORIZATION'] = jwt.encode({'some': 'payload'}, app.config['SECRET_KEY'], algorithm='HS256')
+            sent = {'hotdesking_level': 75, 'colaboration_level': 40, 'num_of_workers': 100, 'area': 516.5305429864253}
+            rv = client.post('/api/m2/generate', data = json.dumps(sent), content_type='application/json')
+            self.assertEqual(rv.status_code, 200)
 if __name__ == '__main__':
     unittest.main()
