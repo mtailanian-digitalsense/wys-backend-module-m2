@@ -6,3 +6,4 @@ mysqlclient
 pyjwt
 gunicorn
 requests
+cryptography
