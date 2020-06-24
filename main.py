@@ -6,6 +6,7 @@ from lib import app, os, db, abort, jsonify, request, num_private_office, total_
 from flask_swagger import swagger
 from flask_swagger_ui import get_swaggerui_blueprint
 from functools import wraps
+from flask_cors import CORS
 
 # Loading Config Parameters
 APP_HOST = os.getenv('APP_HOST', '127.0.0.1')
@@ -13,7 +14,7 @@ APP_PORT = os.getenv('APP_PORT', 5001)
 SPACES_MODULE_HOST = os.getenv('SPACES_MODULE_IP', '127.0.0.1')
 SPACES_MODULE_PORT = os.getenv('SPACES_MODULE_PORT', 5002)
 SPACES_MODULE_API_CREATE = os.getenv('SPACES_MODULE_API_CREATE', '/api/spaces/create')
-
+CORS(app)
 try:
     f = open('oauth-public.key', 'r')
     key: str = f.read()
