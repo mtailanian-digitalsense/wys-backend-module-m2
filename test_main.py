@@ -21,8 +21,9 @@ class MainTest(unittest.TestCase):
         db.session.remove()
         db.drop_all()
 
-    def make_payload(self, user_id=1):
-        return {
+    @staticmethod
+    def build_token(key, user_id=1):
+        payload = {
             "aud": "1",
             "jti": "450ca670aff83b220d8fd58d9584365614fceaf210c8db2cf4754864318b5a398cf625071993680d",
             "iat": 1592309117,
@@ -33,17 +34,18 @@ class MainTest(unittest.TestCase):
             "scopes": [],
             "uid": 23
         }
+        return ('Bearer ' + jwt.encode(payload, key, algorithm='RS256').decode('utf-8')).encode('utf-8')
 
     def test_get_m2_value(self):
         with app.test_client() as client:
-            client.environ_base['HTTP_AUTHORIZATION'] = jwt.encode(self.make_payload(), self.key, algorithm='RS256')
+            client.environ_base['HTTP_AUTHORIZATION'] = self.build_token(self.key)
             sent = {'hotdesking_level': 75, 'collaboration_level': 40, 'num_of_workers': 100}
             rv = client.post('/api/m2', data = json.dumps(sent), content_type='application/json')
             self.assertEqual(rv.status_code, 200)
 
     def test_get_generate_workspaces(self):
         with app.test_client() as client:
-            client.environ_base['HTTP_AUTHORIZATION'] = jwt.encode(self.make_payload(), self.key, algorithm='RS256')
+            client.environ_base['HTTP_AUTHORIZATION'] = self.build_token(self.key)
             sent = {'hotdesking_level': 75, 'colaboration_level': 40, 'num_of_workers': 100, 'area': 516.5305429864253}
             rv = client.post('/api/m2/generate', data = json.dumps(sent), content_type='application/json')
             self.assertEqual(rv.status_code, 200)
