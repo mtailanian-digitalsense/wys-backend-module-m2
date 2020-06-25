@@ -7,6 +7,9 @@ from flask_swagger import swagger
 from flask_swagger_ui import get_swaggerui_blueprint
 from functools import wraps
 from flask_cors import CORS
+from sqlalchemy import UniqueConstraint
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.exc import SQLAlchemyError
 
 # Loading Config Parameters
 APP_HOST = os.getenv('APP_HOST', '127.0.0.1')
@@ -14,7 +17,12 @@ APP_PORT = os.getenv('APP_PORT', 5001)
 SPACES_MODULE_HOST = os.getenv('SPACES_MODULE_IP', '127.0.0.1')
 SPACES_MODULE_PORT = os.getenv('SPACES_MODULE_PORT', 5002)
 SPACES_MODULE_API_CREATE = os.getenv('SPACES_MODULE_API_CREATE', '/api/spaces/create')
+PROJECTS_MODULE_HOST = os.getenv('PROJECTS_MODULE_HOST', '127.0.0.1')
+PROJECTS_MODULE_PORT = os.getenv('PROJECTS_MODULE_PORT', 5000)
+PROJECTS_MODULE_API_GET = os.getenv('PROJECTS_MODULE_API_GET', '/api/projects/')
+
 CORS(app)
+
 try:
     f = open('oauth-public.key', 'r')
     key: str = f.read()
@@ -23,7 +31,6 @@ try:
 except Exception as e:
     app.logger.error(f'Can\'t read public key f{e}')
     exit(-1)
-
 
 class M2Generated(db.Model):
     """
@@ -34,18 +41,93 @@ class M2Generated(db.Model):
     ----------
     id: Represent the unique id of a M2 generated
     hot_desking_level: Value of Hot Desking Level
-    collaborative_level: Value of the Collaborative Level
-    workers_num: Value of Workers number
+    collaboration_level: Value of the Collaborative Level
+    workers_number: Value of Workers number
     area: Value of calculated Area
     density: Area density value
     """
     id = db.Column(db.Integer, primary_key=True)
     hot_desking_level = db.Column(db.Integer, nullable=False)
-    collaborative_level = db.Column(db.Integer, nullable=False)
-    workers_num = db.Column(db.Integer, nullable=False)
+    collaboration_level = db.Column(db.Integer, nullable=False)
+    workers_number = db.Column(db.Integer, nullable=False)
     area = db.Column(db.Float, nullable=False)
     density = db.Column(db.Float, nullable=False)
+    project_id = db.Column(db.Integer, nullable=False, unique=True)
+    workspaces = db.relationship(
+        "M2GeneratedWorkspace",
+        backref="m2_generated",
+        cascade="all, delete, delete-orphan")
 
+    def to_dict(self):
+        """
+        Convert to dictionary
+        """
+
+        workspaces_dicts = [workspace.to_dict()
+                                for workspace in self.workspaces]
+        dict = {
+            'id': self.id,
+            'hot_desking_level': self.hot_desking_level,
+            'collaboration_level': self.collaboration_level,
+            'workers_number': self.workers_number,
+            'area': self.area,
+            'density': self.density,
+            'project_id': self.project_id,
+            'workspaces': workspaces_dicts
+        }
+        return dict
+
+    def serialize(self):
+        """
+        Serialize to json
+        """
+        return jsonify(self.to_dict())
+
+class M2GeneratedWorkspace(db.Model):
+    """
+    M2GeneratedWorkspace.
+    Represents the values of quantity and observation per space configured by the user 
+    or previusly generated. All this according to the m2 value.
+
+    Attributes
+    ----------
+    id: Represent the unique id of a M2 generated
+    observation: Value of observation
+    quantity: Value of quantity associated to space
+    m2_gen_id: Foreign key of m2_gens associated
+    space_id: Foreign key of space associated
+    """
+    __table_args__ = (db.UniqueConstraint('space_id', 'm2_gen_id'),)
+
+    id = db.Column(db.Integer, primary_key=True)
+    observation = db.Column(db.Integer)
+    quantity = db.Column(db.Integer, nullable=False)
+    space_id = db.Column(db.Integer, nullable=False)
+    m2_gen_id = db.Column(db.Integer, db.ForeignKey(
+        'm2_generated.id'), nullable=False)
+
+    def to_dict(self):
+        """
+        Convert to dictionary
+        """
+
+        dict = {
+            'id': self.id,
+            'observation': self.observation,
+            'quantity': self.quantity,
+            'space_id': self.space_id,
+            'm2_gen_id': self.m2_gen_id
+        }
+        return dict
+
+    def serialize(self):
+        """
+        Serialize to json
+        """
+        return jsonify(self.to_dict())
+
+db.create_all()
+    
 # Swagger Config
 
 SWAGGER_URL = '/api/m2/docs/'
@@ -137,6 +219,14 @@ def obs_and_quantity_calculator(category_name, subcategory, hotdesking, grade_of
 
     return int(quantity), obs
 
+def get_project_by_id(project_id, token):
+    headers = {'Authorization': token}
+    api_url = 'http://'+ PROJECTS_MODULE_HOST + ':' + str(PROJECTS_MODULE_PORT) + PROJECTS_MODULE_API_GET + str(project_id)
+    rv = requests.get(api_url, headers=headers)
+    if(rv.status_code == 200):
+        return json.loads(rv.text)
+    return None
+
 def token_required(f):  
     @wraps(f)  
     def decorator(*args, **kwargs):
@@ -180,6 +270,8 @@ def get_m2_value():
         ---
         produces:
         - "application/json"
+        tags:
+        - "m2"
         parameters:
         - in: "body"
           name: "body"
@@ -205,7 +297,7 @@ def get_m2_value():
             description: "Server error"
     """
     if not request.json or (not 'hotdesking_level' and not 'collaboration_level' and not 'num_of_workers') in request.json:
-        abort(400)
+        abort(f'Missing data in the body request', 400)
     
     try:
         hotdesking_level = request.json['hotdesking_level']
@@ -220,8 +312,9 @@ def get_m2_value():
         return jsonify({'message': "Error, the area could not be calculated. Try again."}), 500
     
     except Exception as exp:
-        app.logger.error(f"Error in database: mesg ->{exp}")
-        return exp, 500
+        msg = f"Error: mesg ->{exp}"
+        app.logger.error(msg)
+        return msg, 500
 
 @app.route('/api/m2/generate', methods = ['POST'])
 @token_required
@@ -231,21 +324,40 @@ def generate_workspaces():
         ---
         produces:
         - "application/json"
+        tags:
+        - "m2"
         parameters:
         - in: "body"
           name: "body"
           description: "Data required for workspaces to be generated"
-          required: true
+          required:
+            - area
+            - hotdesking_level
+            - collaboration_level
+            - num_of_workers
+          properties:
+            area:
+              type: number
+              description: Area value previously calculated
+            hotdesking_level:
+                type: number
+                description: Hotdesking level
+            collaboration_level:
+                type: number
+                description: Collaboration Level
+            num_of_workers:
+                type: integer
+                description: num of workers
         responses:
           201:
-            description: "Worskpaces data"
+            description: "Worskpaces generated data"
           400:
-            description: "Missing data in the body"
+            description: "Missing data in the request body"
           500:
             description: "Server error"
     """
-    if not request.json or (not 'hotdesking_level' and not 'colaboration_level' and not 'num_of_workers' and not 'area') in request.json:
-        abort(400)
+    if not request.json or (not 'hotdesking_level' and not 'collaboration_level' and not 'num_of_workers' and not 'area') in request.json:
+        abort(f'Missing data in the request body', 400)
         
     try:
         token = request.headers.get('Authorization', None)
@@ -255,7 +367,7 @@ def generate_workspaces():
         workspaces = json.loads(rv.text)
         data = request.json
         hotdesking_level = data['hotdesking_level']
-        grade_of_collaboration = data['colaboration_level']
+        grade_of_collaboration = data['collaboration_level']
         workers_number = data['num_of_workers']
         area = data['area']
 
@@ -268,8 +380,180 @@ def generate_workspaces():
         data['workspaces'] = workspaces
         return jsonify(data), 200
     except requests.exceptions.RequestException as exp:
-        app.logger.error(f"Connection error: ->{exp}")
-        return exp, 500
+        msg = f"Connection error: ->{exp}"
+        app.logger.error(msg)
+        return msg, 500
+
+@app.route('/api/m2/workspaces/save', methods = ['POST'])
+@token_required
+def save_workspaces():
+    """
+        Save generated workspaces
+        ---
+        produces:
+        - "application/json"
+        tags:
+        - "m2"
+        parameters:
+        - in: "body"
+          name: "body"
+          description: "Workspaces thats includes Category and Subcategory with full info., and Spaces with ID value. 
+          Each Subcategory have a quantity setted by user in the current project."
+          required:
+            - project_id
+            - area
+            - hotdesking_level
+            - collaboration_level
+            - num_of_workers
+            - workspaces
+          properties:
+            project_id:
+              type: integer
+              description: ID of the current project
+            area:
+              type: number
+              description: Area value previously calculated
+            hotdesking_level:
+              type: number
+              description: Hotdesking level
+            collaboration_level:
+              type: number
+              description: Collaboration Level
+            num_of_workers:
+              type: integer
+              description: num of workers
+            workspaces:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  subcategories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        area:
+                          type: number
+                        category_id:
+                          type: integer    
+                        name:
+                          type: string
+                        quantity:
+                          type: integer
+                        observation:
+                          type: integer
+                        people_capacity:
+                          type: number
+                        unit_area:
+                          type: number
+                        usage_percentage:
+                          type: number
+                        spaces:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: integer
+        responses:
+          201:
+            description: "Worskpaces data with current Project info."
+          400:
+            description: "Missing data in the body"
+          500:
+            description: "Server error"
+    """
+
+    if request.is_json:
+        data = request.json
+        token = request.headers.get('Authorization', None)
+        try:
+            project = get_project_by_id(data['project_id'], token)
+            if(project is not None):
+                m2_gen = M2Generated.query.filter_by(project_id=project['id']).first()
+                if m2_gen is not None:
+                    db.session.delete(m2_gen)
+                    db.session.commit()
+                m2_gen = M2Generated()
+                m2_gen.hot_desking_level = data['hotdesking_level']
+                m2_gen.collaboration_level = data['collaboration_level']
+                m2_gen.workers_number = data['num_of_workers']
+                m2_gen.area = data['area']
+                m2_gen.density = data['area']/data['num_of_workers']
+                m2_gen.project_id = data['project_id']
+
+                for category in data['workspaces']:
+                    for subcategory in category['subcategories']:
+                        m2_gen_workspace = M2GeneratedWorkspace()
+                        m2_gen_workspace.quantity = subcategory['quantity']
+                        m2_gen_workspace.observation = subcategory['observation']
+                        m2_gen_workspace.space_id = subcategory['spaces'][0]['id']
+                        m2_gen.workspaces.append(m2_gen_workspace)
+
+                db.session.add(m2_gen)
+                db.session.commit()
+
+                project['m2_generated_data'] = m2_gen.to_dict()
+
+                return jsonify(project), 200
+            
+            else:
+                raise Exception("Project doesn't exist or the id is not included on the body")
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            abort(f'Error saving data: {e}', 500)
+        except Exception as exp:
+            msg = f"Error: mesg ->{exp}"
+            app.logger.error(msg)
+            return msg, 500
+    else:
+        abort('Body isn\'t application/json', 400)
+
+@app.route('/api/m2/<project_id>/workspaces/', methods = ['GET'])
+@token_required
+def get_m2_config_by_project_id(project_id):
+    """
+        Get latest configuration of m2 workspaces by current Project ID.
+        ---
+        parameters:
+          - in: path
+            name: project_id
+            type: integer
+            description: Project ID
+        tags:
+        - "m2"
+        responses:
+          200:
+            description: M2 Workspaces Object.
+          404:
+            description: Project Not Found or the Proyect doesn't have a workspaces configuration created.
+          500:
+            description: "Database error"
+    """
+    try:
+        token = request.headers.get('Authorization', None)
+        project = get_project_by_id(project_id, token)
+        if(project is not None):
+            m2_config = M2Generated.query.filter_by(project_id=project_id).first()
+            if m2_config is not None:
+                project['m2_generated_data'] = m2_config.to_dict()
+                return jsonify(project), 200
+            else:
+                raise Exception("This Project doesn't have a workspaces configuration created")
+        
+        raise Exception("Project doesn't exist or the id is not included on the body")
+    except SQLAlchemyError as e:
+            abort(f'Error getting data: {e}', 500)
+    except Exception as exp:
+        msg = f"Error: mesg ->{exp}"
+        app.logger.error(msg)
+        return msg, 404
 
 if __name__ == '__main__':
     app.run(host= APP_HOST, port = APP_PORT, debug = True)
