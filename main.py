@@ -320,7 +320,7 @@ def get_m2_value():
 @token_required
 def generate_workspaces():
     """
-        Get generated workspaces
+        Get generated m2 data and workspaces
         ---
         produces:
         - "application/json"
@@ -329,7 +329,7 @@ def generate_workspaces():
         parameters:
         - in: "body"
           name: "body"
-          description: "Data required for workspaces to be generated"
+          description: "Data required for m2 data and workspaces to be generated"
           required:
             - area
             - hotdesking_level
@@ -350,7 +350,7 @@ def generate_workspaces():
                 description: num of workers
         responses:
           201:
-            description: "Worskpaces generated data"
+            description: "Generated M2 data and worskpaces"
           400:
             description: "Missing data in the request body"
           500:
@@ -384,11 +384,11 @@ def generate_workspaces():
         app.logger.error(msg)
         return msg, 500
 
-@app.route('/api/m2/workspaces/save', methods = ['POST'])
+@app.route('/api/m2/save', methods = ['POST'])
 @token_required
 def save_workspaces():
     """
-        Save generated workspaces
+        Save generated m2 data and workspaces
         ---
         produces:
         - "application/json"
@@ -463,7 +463,7 @@ def save_workspaces():
                                 type: integer
         responses:
           201:
-            description: "Worskpaces data with current Project info."
+            description: "M2 Worskpaces data with the current Project info."
           400:
             description: "Missing data in the body"
           500:
@@ -515,11 +515,11 @@ def save_workspaces():
     else:
         abort('Body isn\'t application/json', 400)
 
-@app.route('/api/m2/<project_id>/workspaces/', methods = ['GET'])
+@app.route('/api/m2/<project_id>', methods = ['GET'])
 @token_required
 def get_m2_config_by_project_id(project_id):
     """
-        Get latest configuration of m2 workspaces by current Project ID.
+        Get latest configuration of m2 data and workspaces by current Project ID.
         ---
         parameters:
           - in: path
@@ -530,9 +530,9 @@ def get_m2_config_by_project_id(project_id):
         - "m2"
         responses:
           200:
-            description: M2 Workspaces Object.
+            description: M2 data and workspaces Object.
           404:
-            description: Project Not Found or the Proyect doesn't have a workspaces configuration created.
+            description: Project Not Found or the Proyect doesn't have a m2 configuration created.
           500:
             description: "Database error"
     """
@@ -547,7 +547,7 @@ def get_m2_config_by_project_id(project_id):
             else:
                 raise Exception("This Project doesn't have a workspaces configuration created")
         
-        raise Exception("Project doesn't exist or the id is not included on the body")
+        raise Exception("Project doesn't exist")
     except SQLAlchemyError as e:
             abort(f'Error getting data: {e}', 500)
     except Exception as exp:
