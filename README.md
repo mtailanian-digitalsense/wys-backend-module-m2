@@ -40,11 +40,13 @@ For a project with ID 123 in the local database where that project, the backend 
 
 **Content** : `Error: mesg -> {error_message}`
 
+### Or
+
 **Condition**: Missing data in the body request
 
 **Code** : `400 Bad Request`
 
-**Content** : `Missing data in the body request`
+**Content** : `Error: mesg -> Missing data in the body request`
 
 ## Generate workspaces with quantity and observation values for each subcategory, given workers, hotdesking, collaborate level and calculated area.
 
@@ -157,11 +159,13 @@ For a values in the **Required Body** example, the backend return this data with
 
 **Content** : `Error: mesg -> {error_message}`
 
+### Or
+
 **Condition**: Missing data in the body request
 
 **Code** : `400 Bad Request`
 
-**Content** : `Missing data in the body request`
+**Content** : `Error: mesg -> Missing data in the body request`
 
 ## Save and update generated workspaces
 
@@ -303,11 +307,13 @@ Complete information of the Project with its saved m2 configuration.
 
 **Content** : `Error: mesg -> {error_message}`
 
+### Or
+
 **Condition**: Body isn't application/json
 
 **Code** : `400 Bad Request`
 
-**Content** : `Body isn't application/json`
+**Content** : `Error: mesg -> Body isn't application/json`
 
 ## Get a latest m2 configuration of current project
 
@@ -372,8 +378,51 @@ If the project's id is 3, then the response will be:
 
 **Content** : `Error: mesg -> {error_message}`
 
+### Or
+
 **Condition** :  Project not found or the Proyect doesn't have a m2 configuration created.
 
 **Code** : `404 Not Found`
 
 **Content** : `Error: mesg -> {error_message}`
+
+## Show all M2 constants
+
+**URL** : `/api/m2/constants`
+
+**Method** : `GET`
+
+**Auth required** : YES
+
+### Success Response
+
+**Code** : `200 OK`
+
+**Content example**
+
+```json
+{
+  "data": 
+  [
+      {
+        "id": 1,
+        "name": "PUESTO TRABAJO OPENPLAN",
+        "value": 3.26
+      },
+      {
+        "id": 2,
+        "name": "SALA REUNION PEQUEÑA",
+        "value": 1.73
+      },
+      ...
+  ]
+}
+```
+
+### Error Responses
+
+**Condition** : If an error occurs with the database.
+
+**Code** : `500 Internal Server Error`
+
+**Content** : `{exception_message}`

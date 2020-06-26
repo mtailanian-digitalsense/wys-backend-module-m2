@@ -266,7 +266,7 @@ def spec():
 @token_required
 def get_m2_value():
     """
-        Get m2 area
+        Get M2 area
         ---
         produces:
         - "application/json"
@@ -320,7 +320,7 @@ def get_m2_value():
 @token_required
 def generate_workspaces():
     """
-        Get generated m2 data and workspaces
+        Get generated M2 data and workspaces
         ---
         produces:
         - "application/json"
@@ -329,7 +329,7 @@ def generate_workspaces():
         parameters:
         - in: "body"
           name: "body"
-          description: "Data required for m2 data and workspaces to be generated"
+          description: "Data required for M2 data and workspaces to be generated"
           required:
             - area
             - hotdesking_level
@@ -388,7 +388,7 @@ def generate_workspaces():
 @token_required
 def save_workspaces():
     """
-        Save generated m2 data and workspaces
+        Save generated M2 data and workspaces
         ---
         produces:
         - "application/json"
@@ -519,7 +519,7 @@ def save_workspaces():
 @token_required
 def get_m2_config_by_project_id(project_id):
     """
-        Get latest configuration of m2 data and workspaces by current Project ID.
+        Get latest configuration of M2 data and workspaces by current Project ID.
         ---
         parameters:
           - in: path
@@ -527,12 +527,12 @@ def get_m2_config_by_project_id(project_id):
             type: integer
             description: Project ID
         tags:
-        - "m2"
+        - "M2"
         responses:
           200:
             description: M2 data and workspaces Object.
           404:
-            description: Project Not Found or the Proyect doesn't have a m2 configuration created.
+            description: Project Not Found or the Proyect doesn't have a M2 configuration created.
           500:
             description: "Database error"
     """
@@ -554,6 +554,27 @@ def get_m2_config_by_project_id(project_id):
         msg = f"Error: mesg ->{exp}"
         app.logger.error(msg)
         return msg, 404
+
+@app.route('/api/m2/constants', methods = ['GET'])
+@token_required
+def get_all_constants():
+    """
+        Get all M2 constants
+        ---
+        tags:
+            - "M2/Constants"
+        responses:
+          200:
+            description: List of constants used to calculate M2 area. 
+          500:
+            description: "Database error"
+    """
+    try:
+        constants =  [c.to_dict() for c in M2InternalConfigVar.query.all()]
+        return jsonify(constants), 200
+    except SQLAlchemyError as e:
+        abort(f'Error getting data: {e}', 500)
+
 
 if __name__ == '__main__':
     app.run(host= APP_HOST, port = APP_PORT, debug = True)

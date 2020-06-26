@@ -33,6 +33,24 @@ class M2InternalConfigVar(db.Model):
     name = db.Column(db.String(120))
     value = db.Column(db.Float)
 
+    def to_dict(self):
+        """
+        Convert to dictionary
+        """
+
+        dict = {
+            'id': self.id,
+            'name': self.name,
+            'value': self.value
+        }
+        return dict
+
+    def serialize(self):
+        """
+        Serialize to json
+        """
+        return jsonify(self.to_dict())
+
 db.create_all()  # Create all tables
 
 def load_config_vars():
