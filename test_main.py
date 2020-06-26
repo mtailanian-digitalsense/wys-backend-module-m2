@@ -58,5 +58,16 @@ class MainTest(unittest.TestCase):
             assert len(constants) == 13
             self.assertEqual(rv.status_code, 200)
 
+    def test_update_constants(self):
+        with app.test_client() as client:
+            client.environ_base['HTTP_AUTHORIZATION'] = self.build_token(self.key)
+            sent = [{'id': 1, 'value': 3.14 },
+                    {'id': 2, 'value': 2.9 }]
+            rv = client.put('/api/m2/constants', data = json.dumps(sent), content_type='application/json')
+            constants = json.loads(rv.data)
+            self.assertEqual(rv.status_code, 200)
+            self.assertEqual(next((True for constant in constants if constant['value'] == sent[0]['value'] and constant['id'] == sent[0]['id']), False), True)
+            self.assertEqual(next((True for constant in constants if constant['value'] == sent[1]['value'] and constant['id'] == sent[1]['id']), False), True)
+
 if __name__ == '__main__':
     unittest.main()
