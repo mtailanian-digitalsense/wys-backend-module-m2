@@ -271,7 +271,7 @@ def get_m2_value():
         produces:
         - "application/json"
         tags:
-        - "m2"
+        - "M2"
         parameters:
         - in: "body"
           name: "body"
@@ -325,7 +325,7 @@ def generate_workspaces():
         produces:
         - "application/json"
         tags:
-        - "m2"
+        - "M2"
         parameters:
         - in: "body"
           name: "body"
@@ -393,7 +393,7 @@ def save_workspaces():
         produces:
         - "application/json"
         tags:
-        - "m2"
+        - "M2"
         parameters:
         - in: "body"
           name: "body"
@@ -562,7 +562,7 @@ def get_all_constants():
         Get all M2 constants
         ---
         tags:
-            - "M2/Constants"
+        - "M2/Constants"
         responses:
           200:
             description: List of constants used to calculate M2 area. 
@@ -574,6 +574,51 @@ def get_all_constants():
         return jsonify(constants), 200
     except SQLAlchemyError as e:
         abort(f'Error getting data: {e}', 500)
+
+@app.route('/api/m2/constants', methods = ['PUT'])
+@token_required
+def update_constants():
+    """
+        Update M2 constants
+        ---
+        produces:
+        - "application/json"
+        tags:
+        - "M2/Constants"
+        parameters:
+        - in: "body"
+          name: "body"
+          description: "List of constants data to be updated."
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id: 
+                  type: integer
+                value:
+                  type: number
+        responses:
+          200:
+            description: List of constants used to calculate M2 area. 
+          400:
+            description: Body isn't application/json or empty body data.
+          500:
+            description: "Database error".
+    """
+    if request.is_json:
+        if len(request.json) > 0:
+            try:
+                db.session.bulk_update_mappings(M2InternalConfigVar, request.json)
+                db.session.commit()
+                updated_constants =  [c.to_dict() for c in M2InternalConfigVar.query.all()]
+                return jsonify(updated_constants), 200
+            except SQLAlchemyError as e:
+                abort(f'Error getting data: {e}', 500)
+        else:
+            abort('Body data required', 400)
+    else:
+        abort('Body isn\'t application/json', 400)
 
 
 if __name__ == '__main__':

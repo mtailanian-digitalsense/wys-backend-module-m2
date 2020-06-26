@@ -401,25 +401,88 @@ If the project's id is 3, then the response will be:
 **Content example**
 
 ```json
-{
-  "data": 
-  [
-      {
-        "id": 1,
-        "name": "PUESTO TRABAJO OPENPLAN",
-        "value": 3.26
-      },
-      {
-        "id": 2,
-        "name": "SALA REUNION PEQUEÑA",
-        "value": 1.73
-      },
-      ...
-  ]
-}
+[
+    {
+      "id": 1,
+      "name": "PUESTO TRABAJO OPENPLAN",
+      "value": 3.26
+    },
+    {
+      "id": 2,
+      "name": "SALA REUNION PEQUEÑA",
+      "value": 1.73
+    },
+    ...
+]
 ```
 
 ### Error Responses
+
+**Condition** : If an error occurs with the database.
+
+**Code** : `500 Internal Server Error`
+
+**Content** : `{exception_message}`
+
+## Update M2 constants values
+
+**URL** : `/api/m2/constants`
+
+**Required Body** : 
+
+**IMPORTANT**: The names of the constants are not required and should not be included for now.
+
+```json
+[
+    {
+      "id": 1,
+      "value": 3.14
+    },
+    {
+      "id": 2,
+      "value": 2.9
+    },
+    ...
+]
+```
+
+**Method** : `PUT`
+
+**Auth required** : YES
+
+### Success Response
+
+**Code** : `200 OK`
+
+**Content example**
+
+All constants info. and updated values:
+
+```json
+[
+    {
+      "id": 1,
+      "name": "PUESTO TRABAJO OPENPLAN",
+      "value": 3.14
+    },
+    {
+      "id": 2,
+      "name": "SALA REUNION PEQUEÑA",
+      "value": 2.9
+    },
+    ...
+]
+```
+
+### Error Responses
+
+**Condition** :  If the body data is not included or the body data is not `application/json`.
+
+**Code** : `404 Not Found`
+
+**Content** : `Error: mesg -> {error_message}`
+
+### Or
 
 **Condition** : If an error occurs with the database.
 
