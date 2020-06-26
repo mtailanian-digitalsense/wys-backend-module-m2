@@ -50,5 +50,13 @@ class MainTest(unittest.TestCase):
             rv = client.post('/api/m2/generate', data = json.dumps(sent), content_type='application/json')
             self.assertEqual(rv.status_code, 200)
 
+    def test_get_all_constants(self):
+        with app.test_client() as client:
+            client.environ_base['HTTP_AUTHORIZATION'] = self.build_token(self.key)
+            rv = client.get('/api/m2/constants')
+            constants = json.loads(rv.data)
+            assert len(constants) == 13
+            self.assertEqual(rv.status_code, 200)
+
 if __name__ == '__main__':
     unittest.main()
