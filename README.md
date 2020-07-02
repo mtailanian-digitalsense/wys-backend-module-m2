@@ -56,7 +56,7 @@ For a project with ID 123 in the local database where that project, the backend 
 ```json
 {
     "hotdesking_level": 75, //Integer between 70 and 100
-    "colaboration_level": 40, //Integer between 30 and 50
+    "collaboration_level": 40, //Integer between 30 and 50
     "num_of_workers": 100, //Integer grather than 0.
     "area": 516.5305429864253 //Float: Calculated area
 } 
@@ -77,7 +77,7 @@ For a values in the **Required Body** example, the backend return this data with
 {
     
   "area": 516.5305429864253, //Generated area value
-  "colaboration_level": 40, //Colaboration level previously entered by the user.
+  "collaboration_level": 40, //Collaboration level previously entered by the user.
   "hotdesking_level": 75, //Hotdesking level previously entered by the user.
   "num_of_workers": 100, //Workers number previously entered by the user.
   "workspaces": [ //Array of workspaces (Categories->Subcategories->Spaces)
