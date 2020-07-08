@@ -604,7 +604,7 @@ def update_constants():
           400:
             description: Body isn't application/json or empty body data.
           500:
-            description: "Database error".
+            description: "Database error"
     """
     if request.is_json:
         if len(request.json) > 0:
