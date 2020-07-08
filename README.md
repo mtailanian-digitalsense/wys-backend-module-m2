@@ -34,19 +34,19 @@ For a project with ID 123 in the local database where that project, the backend 
 
 ### Error Responses
 
-**Condition** :  If server has some error.
-
-**Code** : `500 Internal Error Server`
-
-**Content** : `Error: mesg -> {error_message}`
-
-### Or
-
 **Condition**: Missing data in the body request
 
 **Code** : `400 Bad Request`
 
 **Content** : `Error: mesg -> Missing data in the body request`
+
+### Or
+
+**Condition** :  If server has some error.
+
+**Code** : `500 Internal Error Server`
+
+**Content** : `Error: mesg -> {error_message}`
 
 ## Generate workspaces with quantity and observation values for each subcategory, given workers, hotdesking, collaborate level and calculated area.
 
@@ -152,20 +152,19 @@ For a values in the **Required Body** example, the backend return this data with
 ```
 
 ### Error Responses
+**Condition**: Missing data in the body request
+
+**Code** : `400 Bad Request`
+
+**Content** : `Error: mesg -> Missing data in the body request`
+
+### Or
 
 **Condition** :  If server has some error.
 
 **Code** : `500 Internal Error Server`
 
 **Content** : `Error: mesg -> {error_message}`
-
-### Or
-
-**Condition**: Missing data in the body request
-
-**Code** : `400 Bad Request`
-
-**Content** : `Error: mesg -> Missing data in the body request`
 
 ## Save and update generated workspaces
 
@@ -301,19 +300,19 @@ Complete information of the Project with its saved m2 configuration.
 
 ### Error Responses
 
-**Condition** :  If server has some error.
-
-**Code** : `500 Internal Error Server`
-
-**Content** : `Error: mesg -> {error_message}`
-
-### Or
-
 **Condition**: Body isn't application/json
 
 **Code** : `400 Bad Request`
 
 **Content** : `Error: mesg -> Body isn't application/json`
+
+### Or
+
+**Condition** :  If server has some error.
+
+**Code** : `500 Internal Error Server`
+
+**Content** : `Error: mesg -> {error_message}`
 
 ## Get a latest m2 configuration of current project
 
@@ -372,17 +371,18 @@ If the project's id is 3, then the response will be:
 
 ### Error Responses
 
-**Condition** :  If server has some error.
-
-**Code** : `500 Internal Error Server`
-
-**Content** : `Error: mesg -> {error_message}`
-
-### Or
-
 **Condition** :  Project not found or the Proyect doesn't have a m2 configuration created.
 
 **Code** : `404 Not Found`
+
+**Content** : `Error: mesg -> {error_message}`
+
+
+### Or
+
+**Condition** :  If server has some error.
+
+**Code** : `500 Internal Error Server`
 
 **Content** : `Error: mesg -> {error_message}`
 
@@ -478,9 +478,9 @@ All constants info. and updated values:
 
 **Condition** :  If the body data is not included or the body data is not `application/json`.
 
-**Code** : `404 Not Found`
+**Code** : `400 Bad Request`
 
-**Content** : `Error: mesg -> {error_message}`
+**Content** : `Error: mesg -> Body isn't application/json`
 
 ### Or
 

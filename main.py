@@ -296,7 +296,7 @@ def get_m2_value():
           500:
             description: "Server error"
     """
-    if not request.json or (not 'hotdesking_level' and not 'collaboration_level' and not 'num_of_workers') in request.json:
+    if request.json.keys() != {'hotdesking_level','collaboration_level','num_of_workers'}:
         abort(f'Missing data in the body request', 400)
     
     try:
@@ -356,7 +356,7 @@ def generate_workspaces():
           500:
             description: "Server error"
     """
-    if not request.json or (not 'hotdesking_level' and not 'collaboration_level' and not 'num_of_workers' and not 'area') in request.json:
+    if request.json.keys() != {'area','hotdesking_level','collaboration_level','num_of_workers'}:
         abort(f'Missing data in the request body', 400)
         
     try:
