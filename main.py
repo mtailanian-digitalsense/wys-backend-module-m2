@@ -19,7 +19,8 @@ SPACES_MODULE_PORT = os.getenv('SPACES_MODULE_PORT', 5002)
 SPACES_MODULE_API_CREATE = os.getenv('SPACES_MODULE_API_CREATE', '/api/spaces/create')
 PROJECTS_MODULE_HOST = os.getenv('PROJECTS_MODULE_HOST', '127.0.0.1')
 PROJECTS_MODULE_PORT = os.getenv('PROJECTS_MODULE_PORT', 5000)
-PROJECTS_MODULE_API_GET = os.getenv('PROJECTS_MODULE_API_GET', '/api/projects/')
+PROJECTS_MODULE_API = os.getenv('PROJECTS_MODULE_API', '/api/projects/')
+PROJECTS_URL = f"http://{PROJECTS_MODULE_HOST}:{PROJECTS_MODULE_PORT}"
 
 CORS(app)
 
@@ -221,11 +222,23 @@ def obs_and_quantity_calculator(category_name, subcategory, hotdesking, grade_of
 
 def get_project_by_id(project_id, token):
     headers = {'Authorization': token}
-    api_url = 'http://'+ PROJECTS_MODULE_HOST + ':' + str(PROJECTS_MODULE_PORT) + PROJECTS_MODULE_API_GET + str(project_id)
+    api_url = PROJECTS_URL + PROJECTS_MODULE_API + str(project_id)
     rv = requests.get(api_url, headers=headers)
-    if(rv.status_code == 200):
+    if rv.status_code == 200:
         return json.loads(rv.text)
+    elif rv.status_code == 500:
+      raise Exception("Cannot connect to the projects module")
     return None
+
+def update_project_by_id(project_id, data, token):
+  headers = {'Authorization': token}
+  api_url = PROJECTS_URL + PROJECTS_MODULE_API + str(project_id)
+  rv = requests.put(api_url, json=data, headers=headers)
+  if rv.status_code == 200:
+    return json.loads(rv.text)
+  elif rv.status_code == 500:
+    raise Exception("Cannot connect to the projects module")
+  return None
 
 def token_required(f):  
     @wraps(f)  
@@ -499,15 +512,16 @@ def save_workspaces():
                 db.session.add(m2_gen)
                 db.session.commit()
 
-                project['m2_generated_data'] = m2_gen.to_dict()
-
-                return jsonify(project), 200
-            
+                project = update_project_by_id(data['project_id'], {'m2_gen_id': m2_gen.id}, token)
+                if project is not None:
+                  project['m2_generated_data'] = m2_gen.to_dict()
+                  return jsonify(project), 201
+                return "Cannot update the Project because doesn't exist", 404          
             else:
-                raise Exception("Project doesn't exist or the id is not included on the body")
+                return "Project doesn't exist or the id is not included on the body", 404
         except SQLAlchemyError as e:
             db.session.rollback()
-            abort(f'Error saving data: {e}', 500)
+            return f'Error saving data: {e}', 500
         except Exception as exp:
             msg = f"Error: mesg ->{exp}"
             app.logger.error(msg)
