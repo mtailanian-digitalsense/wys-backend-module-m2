@@ -37,7 +37,7 @@ class M2ConfigVarsTest(unittest.TestCase):
 
 class M2LogicCalcTest(TestCase):
     def setUp(self):
-        self.TOLERANCE = 0.0001
+        self.TOLERANCE = 0.01
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + \
@@ -75,50 +75,50 @@ class M2LogicCalcTest(TestCase):
         assert total == 10
 
         total = int(round(num_private_office(70, 100)))
-        assert total == 0.0
+        assert total == 4.0
 
         total = int(round(num_private_office(86, 737)))
-        assert total == 32
+        assert total == 63
 
     def test_private_office_m2(self):
         m2 = m2_private_office(100, 100)
-        assert abs(m2 - 119.3) < self.TOLERANCE
+        assert abs(m2 - 91.00) < self.TOLERANCE
 
         m2 = m2_private_office(70, 100)
-        assert abs(m2 - 0.0) < self.TOLERANCE
+        assert abs(m2 - 31.85) < self.TOLERANCE
 
         m2 = m2_private_office(86, 737)
-        assert abs(m2 - 378.0736300) < self.TOLERANCE
+        assert abs(m2 - 576.78) < self.TOLERANCE
 
     def test_factor_phonebooth(self):
         factor = factor_phonebooth(100)
         assert abs(factor - 0.00) < self.TOLERANCE
 
         factor = factor_phonebooth(70)
-        assert abs(factor - 0.1) < self.TOLERANCE
+        assert abs(factor - 0.05) < self.TOLERANCE
 
         factor = factor_phonebooth(86)
-        assert abs(factor - 0.05) < self.TOLERANCE
+        assert abs(factor - 0.00) < self.TOLERANCE
 
     def test_num_phonebooth(self):
         num = int(round(num_phonebooth(100, 100)))
         assert abs(num - 0.00) < self.TOLERANCE
 
         num = int(round(num_phonebooth(70, 100)))
-        assert abs(num - 7) < self.TOLERANCE
+        assert abs(num - 3) < self.TOLERANCE
 
         num = int(round(num_phonebooth(86, 737)))
-        assert abs(num - 32) < self.TOLERANCE
+        assert abs(num - 0) < self.TOLERANCE
 
     def test_m2_phonebooth(self):
         m2 = m2_phonebooth(100, 100)
         assert abs(m2 - 0.00) < self.TOLERANCE
 
         m2 = m2_phonebooth(70, 100)
-        assert abs(m2 - 21.28) < self.TOLERANCE
+        assert abs(m2 - 10.64) < self.TOLERANCE
 
         m2 = m2_phonebooth(86, 737)
-        assert abs(m2 - 96.3406400) < self.TOLERANCE
+        assert abs(m2 - 0) < self.TOLERANCE
 
     def test_collaborative_spaces(self):
         num = int(round(collaborative_spaces(100, 50, 100)))
@@ -152,33 +152,33 @@ class M2LogicCalcTest(TestCase):
 
     def test_m2_support(self):
         m2 = m2_support(100, 100)
-        assert abs(m2 - 72.82941176470590000) < self.TOLERANCE
+        assert abs(m2 - 67.84) < self.TOLERANCE
 
         m2 = m2_support(70, 100)
-        assert abs(m2 - 36.24352941176470000) < self.TOLERANCE
+        assert abs(m2 - 41.86) < self.TOLERANCE
 
         m2 = m2_support(87, 737)
-        assert abs(m2 - 399.48022852941200000) < self.TOLERANCE
+        assert abs(m2 - 434.95) < self.TOLERANCE
 
     def test_m2_circulations(self):
         m2 = m2_circulations(100, 100)
-        assert abs(m2 - 261.4389140271490000) < self.TOLERANCE
+        assert abs(m2 - 243.51) < self.TOLERANCE
 
         m2 = m2_circulations(70, 100)
-        assert abs(m2 - 130.1049773755660000) < self.TOLERANCE
+        assert abs(m2 - 150.28) < self.TOLERANCE
 
         m2 = m2_circulations(87, 737)
-        assert abs(m2 - 1434.0315895927600000) < self.TOLERANCE
+        assert abs(m2 - 1561.37) < self.TOLERANCE
 
     def test_area_calc(self):
         m2 = area_calc(100, 50, 100)
-        assert abs(m2 - 926.4683257918550) < self.TOLERANCE
+        assert abs(m2 - 875.25) < self.TOLERANCE
 
         m2 = area_calc(70, 30, 100)
-        assert abs(m2 - 453.6985067873300) < self.TOLERANCE
+        assert abs(m2 - 500.71) < self.TOLERANCE
 
         m2 = area_calc(87, 40, 737)
-        assert abs(m2 - 5010.7151331221700) < self.TOLERANCE
+        assert abs(m2 - 5277.07880515837) < self.TOLERANCE
 
 
 if __name__ == '__main__':
