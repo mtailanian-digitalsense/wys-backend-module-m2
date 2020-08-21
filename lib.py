@@ -136,10 +136,10 @@ def factor_private_office(hotdesking):
     :return: A factor that is used to calc the number of private office
     """
 
-    if hotdesking < 80:
+    if hotdesking < 70:
         factor = 0.0
 
-    elif 80 <= hotdesking < 90:
+    elif 70 <= hotdesking < 85:
         factor = 0.05
     else:
         factor = 0.1

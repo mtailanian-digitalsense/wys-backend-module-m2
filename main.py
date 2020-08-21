@@ -148,23 +148,21 @@ def round_half_up(n, decimals=0):
     return math.floor(n*multiplier + 0.5) / multiplier
 
 def obs_and_quantity_calculator(category_name, subcategory, hotdesking, grade_of_collaboration, workers_number, area):
-    if(category_name == "Colaborativo"):
+    if(category_name == "Area Soporte Reuniones Informales"):
         obs_switcher = {
-            "Colaborativo":{
-                "Pequeño": num_informal_collaborative(hotdesking, grade_of_collaboration, workers_number)*0.2,
-                "Mediano": num_informal_collaborative(hotdesking, grade_of_collaboration, workers_number)*0.3,
-                "Grande": num_informal_collaborative(hotdesking, grade_of_collaboration, workers_number)*0.5
-            }
+          "Pequeño": num_informal_collaborative(hotdesking, grade_of_collaboration, workers_number)*0.2,
+          "Mediano": num_informal_collaborative(hotdesking, grade_of_collaboration, workers_number)*0.3,
+          "Grande": num_informal_collaborative(hotdesking, grade_of_collaboration, workers_number)*0.5
         }
-        obs = obs_switcher[category_name][subcategory['name']]
+        obs = obs_switcher[subcategory['name']]
     elif(category_name == "Sala Reunión"):
         obs = num_formal_collaborative(hotdesking, grade_of_collaboration, workers_number) * subcategory['usage_percentage']
     else:
         obs = None
 
-    if(category_name == "Puesto de Trabajo"):
+    if(category_name == "Puestos Trabajo"):
         quantity = round_half_up(total_open_plan(hotdesking, workers_number))
-    elif(category_name == "Soporte" and subcategory['name'] == "Baño Individual"):
+    elif(category_name == "Area Servicios" and subcategory['name'] == "Baños"):
         if(workers_number < 11):
             quantity = 1
         elif(11 <= workers_number < 31):
@@ -181,37 +179,41 @@ def obs_and_quantity_calculator(category_name, subcategory, hotdesking, grade_of
             quantity = round_half_up(6 + ((workers_number-100)/15))
     elif(category_name == "Sala Reunión"):
         quantity = round_half_up(obs/subcategory['people_capacity'])
+    elif(category_name == "Especiales"):
+        quantity = 0
     else:
         quantity_switcher = {
-            "Privado":{
-                "Pequeño": round_half_up(num_private_office(hotdesking, workers_number)*0.7),
-                "Grande": round_half_up(num_private_office(hotdesking, workers_number)*0.3)
+            "Puestos Trabajo Privado":{
+                "Privado Pequeño": round_half_up(num_private_office(hotdesking, workers_number)*0.7),
+                "Privado Grande": round_half_up(num_private_office(hotdesking, workers_number)*0.3)
             },
-            "Recepción":{
-                "Pequeña (más Lounge Pequeño)": 1 if area <= 1000 else 0,
-                "Grande (más Lounge Grande)": 1 if area >= 1000 else 0
+            "Area Soporte":{
+                "Recepción Pequeña (más Lounge Pequeño)": 1 if area <= 1000 else 0,
+                "Recepción Grande (más Lounge Grande)": 1 if area >= 1000 else 0,
+                "Quiet Room": round_half_up(num_phonebooth(hotdesking, workers_number)*0.5),
+                "Phonebooth": round_half_up(num_phonebooth(hotdesking, workers_number)*0.5),
+                "Workcoffee/Comedor Mediano": 1 if (501 <= area <= 1500) else 0,
+                "Workcoffee/Comedor Grande": 1 if (area >= 1202) else 0,
+                "Guardado Simple Bajo": 0,
+                "Guardado Simple Alto": 0,
+                "Locker": 0
             },
-            "Individual": {
-                "Pequeño (Quiet Room)": round_half_up(num_phonebooth(hotdesking, workers_number)*0.5),
-                "Pequeño (Phonebooth)": round_half_up(num_phonebooth(hotdesking, workers_number)*0.5)
-            },
-            "Colaborativo":{
+            "Area Soporte Reuniones Informales":{
                 "Pequeño": round_half_up(obs/4) if obs is not None else None,
                 "Mediano": round_half_up(obs/9) if obs is not None else None,
                 "Grande": round_half_up(obs/13) if obs is not None else None
             },
-            "Coffee/Comedor":{
-                "Mediano": 1 if (501 <= area <= 1500) else 0,
-                "Grande": 1 if (area >= 1202) else 0
-            },
-            "Soporte":{
+            "Area Servicios":{
                 "Kitchenette": 1 if area < 500 else 0,
-                "Servidor Pequeño": 1 if area < 500 else 0,
-                "Servidor Mediano": 1 if (501 <= area <= 1500) else 0,
-                "Servidor Grande": 1 if area > 1501 else 0,
-                "Baño Accesibilidad": 1 if area > 500 else 0,
+                "Servidor 1 Gabinete": 1 if area < 500 else 0,
+                "Servidor 2 Gabinetes": 1 if (501 <= area <= 1500) else 0,
+                "Servidor 3 Gabinetes": 1 if area > 1501 else 0,
+                "Baño Accesibilidad Universal": 1 if area > 500 else 0,
                 "Print Pequeño": round_half_up(1 + (area/600)),
-                "Print Grande": round_half_up(area/1200)
+                "Print Grande": round_half_up(area/1200),
+                "Sala Lactancia": 0,
+                "Bodega": 0,
+                "Coffee point": 0
             }
         }
         quantity = quantity_switcher[category_name][subcategory['name']]
