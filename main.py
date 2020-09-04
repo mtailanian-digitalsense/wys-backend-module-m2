@@ -388,10 +388,13 @@ def generate_workspaces():
 
         for category in workspaces:
             category_name = category["name"]
+            category["subcategories"][:] = [subcategory for subcategory in category["subcategories"] if len(subcategory['spaces']) > 0]
             for subcategory in category["subcategories"]:
-                quantity, obs = obs_and_quantity_calculator(category_name, subcategory, hotdesking_level, grade_of_collaboration, workers_number, area)
-                subcategory['quantity'] = quantity
-                subcategory['observation'] = obs
+              for space in subcategory['spaces']:
+                space['quantity'] = 0
+              quantity, obs = obs_and_quantity_calculator(category_name, subcategory, hotdesking_level, grade_of_collaboration, workers_number, area)
+              subcategory['spaces'][0]['quantity'] = quantity
+              subcategory['observation'] = obs
         data['workspaces'] = workspaces
         return jsonify(data), 200
     except requests.exceptions.RequestException as exp:
@@ -413,7 +416,7 @@ def save_workspaces():
         - in: "body"
           name: "body"
           description: "Workspaces thats includes Category and Subcategory with full info., and Spaces with ID value. 
-          Each Subcategory have a quantity setted by user in the current project."
+          Each Space (or Workspace) have a quantity setted by user in the current project."
           required:
             - project_id
             - area
@@ -459,8 +462,6 @@ def save_workspaces():
                           type: integer    
                         name:
                           type: string
-                        quantity:
-                          type: integer
                         observation:
                           type: integer
                         people_capacity:
@@ -475,6 +476,8 @@ def save_workspaces():
                             type: object
                             properties:
                               id:
+                                type: integer
+                              quantity:
                                 type: integer
         responses:
           201:
@@ -504,12 +507,13 @@ def save_workspaces():
                 m2_gen.project_id = data['project_id']
 
                 for category in data['workspaces']:
-                    for subcategory in category['subcategories']:
-                        m2_gen_workspace = M2GeneratedWorkspace()
-                        m2_gen_workspace.quantity = subcategory['quantity']
-                        m2_gen_workspace.observation = subcategory['observation']
-                        m2_gen_workspace.space_id = subcategory['spaces'][0]['id']
-                        m2_gen.workspaces.append(m2_gen_workspace)
+                  for subcategory in category['subcategories']:
+                    for space in subcategory['spaces']:
+                      m2_gen_workspace = M2GeneratedWorkspace()
+                      m2_gen_workspace.quantity = space['quantity']
+                      m2_gen_workspace.observation = subcategory['observation']
+                      m2_gen_workspace.space_id = space['id']
+                      m2_gen.workspaces.append(m2_gen_workspace)
 
                 db.session.add(m2_gen)
                 db.session.commit()

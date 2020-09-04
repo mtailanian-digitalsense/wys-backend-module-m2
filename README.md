@@ -92,10 +92,10 @@ For a values in the **Required Body** example, the backend return this data with
           "name": "Pequeña", //Subcategory name
           "observation": 16,    //Integer: Observation value generated
           "people_capacity": 5.0, //Float: Subcategory people capacity value
-          "quantity": 3, //Integer: Quantity value generated
           "spaces": [ //Array of associated spaces to subcategory
             {
-              "id": 15 //Space ID
+              "id": 15, //Space ID
+              "quantity": 3, //Integer: Quantity value generated
             }
           ],
           "unit_area": 1.73, //Float: Subcategory unit area value
@@ -108,10 +108,10 @@ For a values in the **Required Body** example, the backend return this data with
           "name": "Mediana",
           "observation": 12,
           "people_capacity": 8.0,
-          "quantity": 2,
           "spaces": [
             {
-              "id": 16
+              "id": 16,
+              "quantity": 2
             }
           ],
           "unit_area": 2.16,
@@ -131,13 +131,14 @@ For a values in the **Required Body** example, the backend return this data with
           "name": "Pequeño",
           "observation": null,
           "people_capacity": 1.0,
-          "quantity": 0,
           "spaces": [
             {
-              "id": 17
+              "id": 17,
+              "quantity": 0
             },
             {
-              "id": 18
+              "id": 18,
+              "quantity": 0
             }
           ],
           "unit_area": 11.93,
@@ -193,10 +194,10 @@ For a values in the **Required Body** example, the backend return this data with
           "name": "Pequeña",
           "observation": 16,
           "people_capacity": 5.0,
-          "quantity": 3,
           "spaces": [
             {
-              "id": 15
+              "id": 15,
+              "quantity": 3,
             }
           ],
           "unit_area": 1.73,
@@ -209,10 +210,10 @@ For a values in the **Required Body** example, the backend return this data with
           "name": "Mediana",
           "observation": 12,
           "people_capacity": 8.0,
-          "quantity": 2,
           "spaces": [
             {
-              "id": 16
+              "id": 16,
+              "quantity": 2
             }
           ],
           "unit_area": 2.16,
@@ -231,10 +232,10 @@ For a values in the **Required Body** example, the backend return this data with
           "name": "Pequeño",
           "observation": null,
           "people_capacity": 1.0,
-          "quantity": 5,
           "spaces": [
             {
-              "id": 17
+              "id": 17,
+              "quantity": 5
             }
           ],
           "unit_area": 11.93,
