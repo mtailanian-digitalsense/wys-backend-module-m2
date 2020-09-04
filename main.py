@@ -251,7 +251,7 @@ def token_required(f):
             token = bearer_token.split(" ")[1]
         except Exception as ierr:
             app.logger.error(ierr)
-            abort(jsonify({'message': 'a valid bearer token is missing'}), 500)
+            return jsonify({'message': 'a valid bearer token is missing'}), 500
 
         if not token:
             app.logger.debug("token_required")
@@ -312,7 +312,7 @@ def get_m2_value():
             description: "Server error"
     """
     if request.json.keys() != {'hotdesking_level','collaboration_level','num_of_workers'}:
-        abort(f'Missing data in the body request', 400)
+        return f'Missing data in the body request', 400
     
     try:
         hotdesking_level = request.json['hotdesking_level']
@@ -372,7 +372,7 @@ def generate_workspaces():
             description: "Server error"
     """
     if request.json.keys() != {'area','hotdesking_level','collaboration_level','num_of_workers'}:
-        abort(f'Missing data in the request body', 400)
+        return f'Missing data in the request body', 400
         
     try:
         token = request.headers.get('Authorization', None)
@@ -533,7 +533,7 @@ def save_workspaces():
             app.logger.error(msg)
             return msg, 500
     else:
-        abort('Body isn\'t application/json', 400)
+        return 'Body isn\'t application/json', 400
 
 @app.route('/api/m2/<project_id>', methods = ['GET'])
 @token_required
@@ -569,11 +569,11 @@ def get_m2_config_by_project_id(project_id):
         
         raise Exception("Project doesn't exist")
     except SQLAlchemyError as e:
-            abort(f'Error getting data: {e}', 500)
+      return f'Error getting data: {e}', 500
     except Exception as exp:
-        msg = f"Error: mesg ->{exp}"
-        app.logger.error(msg)
-        return msg, 404
+      msg = f"Error: mesg ->{exp}"
+      app.logger.error(msg)
+      return msg, 404
 
 @app.route('/api/m2/constants', methods = ['GET'])
 @token_required
@@ -593,7 +593,7 @@ def get_all_constants():
         constants =  [c.to_dict() for c in M2InternalConfigVar.query.all()]
         return jsonify(constants), 200
     except SQLAlchemyError as e:
-        abort(f'Error getting data: {e}', 500)
+        return f'Error getting data: {e}', 500
 
 @app.route('/api/m2/constants', methods = ['PUT'])
 @token_required
@@ -634,11 +634,11 @@ def update_constants():
                 updated_constants =  [c.to_dict() for c in M2InternalConfigVar.query.all()]
                 return jsonify(updated_constants), 200
             except SQLAlchemyError as e:
-                abort(f'Error getting data: {e}', 500)
+                return f'Error getting data: {e}', 500
         else:
-            abort('Body data required', 400)
+            return 'Body data required', 400
     else:
-        abort('Body isn\'t application/json', 400)
+        return 'Body isn\'t application/json', 400
 
 
 if __name__ == '__main__':
