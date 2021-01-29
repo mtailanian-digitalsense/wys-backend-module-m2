@@ -17,6 +17,12 @@ APP_PORT = os.getenv('APP_PORT', 5001)
 SPACES_MODULE_HOST = os.getenv('SPACES_MODULE_IP', '127.0.0.1')
 SPACES_MODULE_PORT = os.getenv('SPACES_MODULE_PORT', 5002)
 SPACES_MODULE_API_CREATE = os.getenv('SPACES_MODULE_API_CREATE', '/api/spaces/create')
+
+PRICES_MODULE_HOST = os.getenv('PRICES_MODULE_IP', '127.0.0.1')
+PRICES_MODULE_PORT = os.getenv('PRICES_MODULE_PORT', 5008)
+PRICES_MODULE_API = os.getenv('PRICES_MODULE_API', '/api/prices/')
+PRICES_URL = f"http://{PRICES_MODULE_HOST}:{PRICES_MODULE_PORT}"
+
 PROJECTS_MODULE_HOST = os.getenv('PROJECTS_MODULE_HOST', '127.0.0.1')
 PROJECTS_MODULE_PORT = os.getenv('PROJECTS_MODULE_PORT', 5000)
 PROJECTS_MODULE_API = os.getenv('PROJECTS_MODULE_API', '/api/projects/')
@@ -231,6 +237,27 @@ def get_project_by_id(project_id, token):
     elif rv.status_code == 500:
       raise Exception("Cannot connect to the projects module")
     return None
+
+def exists_price_project_by_id(project_id, token):
+    headers = {'Authorization': token}
+    api_url = PRICES_URL + PRICES_MODULE_API + '/exists/' + str(project_id)
+    rv = requests.get(api_url, headers=headers)
+    if rv.status_code == 200:
+        return json.loads(rv.text)
+    elif rv.status_code == 500:
+      raise Exception("Cannot connect to the prices module")
+    return None
+
+def update_prices_project_by_id(project_id, area, token):
+  data={'m2':area}
+  headers = {'Authorization': token}
+  api_url = PRICES_URL + PRICES_MODULE + '/update/' + str(project_id)
+  rv = requests.put(api_url, json=data, headers=headers)
+  if rv.status_code == 200:
+    return json.loads(rv.text)
+  elif rv.status_code == 500:
+    raise Exception("Cannot connect to the prices module")
+  return None
 
 def update_project_by_id(project_id, data, token):
   headers = {'Authorization': token}
@@ -493,7 +520,9 @@ def save_workspaces():
         token = request.headers.get('Authorization', None)
         try:
             project = get_project_by_id(data['project_id'], token)
+            
             if(project is not None):
+                
                 m2_gen = M2Generated.query.filter_by(project_id=project['id']).first()
                 if m2_gen is not None:
                     db.session.delete(m2_gen)
@@ -522,7 +551,12 @@ def save_workspaces():
                 if project is not None:
                   project['m2_generated_data'] = m2_gen.to_dict()
                   return jsonify(project), 201
-                return "Cannot update the Project because doesn't exist", 404          
+                return "Cannot update the Project because doesn't exist", 404    
+                
+                prices_project = exists_price_project_by_id(data['project_id'],token) 
+                if prices_project['status'] == 'Yes':
+                  prices_project = update_prices_project_by_id(data['project_id'],data['area'],token)
+
             else:
                 return "Project doesn't exist or the id is not included on the body", 404
         except SQLAlchemyError as e:
