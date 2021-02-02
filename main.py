@@ -518,7 +518,6 @@ def save_workspaces():
     pp = pprint.PrettyPrinter(indent=4)
     if request.is_json:
         data = request.json
-        pp.pprint(data)
         token = request.headers.get('Authorization', None)
         try:
             project = get_project_by_id(data['project_id'], token)
@@ -548,7 +547,7 @@ def save_workspaces():
 
                 db.session.add(m2_gen)
                 db.session.commit()
-
+                pp.pprint(m2_gen)
                 project = update_project_by_id(data['project_id'], {'m2_gen_id': m2_gen.id}, token)
                 pp.pprint(project)
                 if project is not None:
