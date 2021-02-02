@@ -2,6 +2,7 @@ import jwt
 import requests
 import json
 import math
+import pprint
 from lib import app, os, db, abort, jsonify, request, num_private_office, total_open_plan, num_formal_collaborative, num_informal_collaborative, num_phonebooth, area_calc, M2InternalConfigVar
 from flask_swagger import swagger
 from flask_swagger_ui import get_swaggerui_blueprint
@@ -514,9 +515,10 @@ def save_workspaces():
           500:
             description: "Server error"
     """
-
+    pp = pprint.PrettyPrinter(indent=4)
     if request.is_json:
         data = request.json
+        pp.pprint(data)
         token = request.headers.get('Authorization', None)
         try:
             project = get_project_by_id(data['project_id'], token)
@@ -548,16 +550,17 @@ def save_workspaces():
                 db.session.commit()
 
                 project = update_project_by_id(data['project_id'], {'m2_gen_id': m2_gen.id}, token)
+                pp.pprint(project)
                 if project is not None:
                   project['m2_generated_data'] = m2_gen.to_dict()
                   return jsonify(project), 201
                 return "Cannot update the Project because doesn't exist", 404    
                 
                 prices_project = exists_price_project_by_id(data['project_id'],token) 
-                print(prices_project['status'])
+                pp.pprint(prices_project['status'])
                 if prices_project['status'] == 'Yes':
                   prices_project = update_prices_project_by_id(data['project_id'],data['area'],token)
-                  print(prices_project)
+                  pp.pprint(prices_project)
 
             else:
                 return "Project doesn't exist or the id is not included on the body", 404
