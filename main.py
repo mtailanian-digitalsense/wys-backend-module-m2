@@ -558,15 +558,13 @@ def save_workspaces():
                 pp.pprint(project)
                 if project is not None:
                   project['m2_generated_data'] = m2_gen.to_dict()
+                  prices_project = exists_price_project_by_id(data['project_id'],token) 
+                  pp.pprint(prices_project['status'])
+                  if prices_project['status'] == 'Yes':
+                    prices_project = update_prices_project_by_id(data['project_id'],data['area'],token)
+                    pp.pprint(prices_project)
                   return jsonify(project), 201
                 return "Cannot update the Project because doesn't exist", 404    
-                
-                prices_project = exists_price_project_by_id(data['project_id'],token) 
-                pp.pprint(prices_project['status'])
-                if prices_project['status'] == 'Yes':
-                  prices_project = update_prices_project_by_id(data['project_id'],data['area'],token)
-                  pp.pprint(prices_project)
-
             else:
                 return "Project doesn't exist or the id is not included on the body", 404
         except SQLAlchemyError as e:
