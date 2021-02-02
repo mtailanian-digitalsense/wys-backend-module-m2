@@ -518,6 +518,7 @@ def save_workspaces():
     pp = pprint.PrettyPrinter(indent=4)
     if request.is_json:
         data = request.json
+        pp.pprint(data['project_id'])
         token = request.headers.get('Authorization', None)
         pp.pprint(token)
         print('hola')
