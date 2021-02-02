@@ -23,7 +23,6 @@ PRICES_MODULE_HOST = os.getenv('PRICES_MODULE_IP', '127.0.0.1')
 PRICES_MODULE_PORT = os.getenv('PRICES_MODULE_PORT', 5008)
 PRICES_MODULE_API = os.getenv('PRICES_MODULE_API', '/api/prices/')
 PRICES_MODULE_API_EXISTS = os.getenv('PRICES_MODULE_API_EXISTS', '/api/prices/exists')
-PRICES_URL = f"http://{PRICES_MODULE_HOST}:{PRICES_MODULE_PORT}"
 
 PROJECTS_MODULE_HOST = os.getenv('PROJECTS_MODULE_HOST', '127.0.0.1')
 PROJECTS_MODULE_PORT = os.getenv('PROJECTS_MODULE_PORT', 5000)
@@ -242,7 +241,7 @@ def get_project_by_id(project_id, token):
 
 def exists_price_project_by_id(project_id, token):
     headers = {'Authorization': token}
-    api_url = PRICES_URL + PRICES_MODULE_API_EXISTS + '/' + str(project_id)
+    api_url = f"http://{PRICES_MODULE_HOST}:{PRICES_MODULE_PORT}" + PRICES_MODULE_API_EXISTS + '/' + str(project_id)
     rv = requests.get(api_url, headers=headers)
     if rv.status_code == 200:
         return json.loads(rv.text)
@@ -253,7 +252,8 @@ def exists_price_project_by_id(project_id, token):
 def update_prices_project_by_id(project_id, area, token):
   data={'m2':area}
   headers = {'Authorization': token}
-  api_url = PRICES_URL + PRICES_MODULE + '/update/' + str(project_id)
+  api_url = f"http://{PRICES_MODULE_HOST}:{PRICES_MODULE_PORT}" + PRICES_MODULE_API + 'update/' + str(project_id)
+  print(api_url)
   rv = requests.put(api_url, json=data, headers=headers)
   if rv.status_code == 200:
     return json.loads(rv.text)
