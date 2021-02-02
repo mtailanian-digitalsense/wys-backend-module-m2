@@ -519,11 +519,13 @@ def save_workspaces():
     if request.is_json:
         data = request.json
         token = request.headers.get('Authorization', None)
+        print('hola')
         try:
+            print('hola1')
             project = get_project_by_id(data['project_id'], token)
             
             if(project is not None):
-                
+                print('hola3')
                 m2_gen = M2Generated.query.filter_by(project_id=project['id']).first()
                 if m2_gen is not None:
                     db.session.delete(m2_gen)
