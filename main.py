@@ -554,8 +554,10 @@ def save_workspaces():
                 return "Cannot update the Project because doesn't exist", 404    
                 
                 prices_project = exists_price_project_by_id(data['project_id'],token) 
+                print(prices_project['status'])
                 if prices_project['status'] == 'Yes':
                   prices_project = update_prices_project_by_id(data['project_id'],data['area'],token)
+                  print(prices_project)
 
             else:
                 return "Project doesn't exist or the id is not included on the body", 404
