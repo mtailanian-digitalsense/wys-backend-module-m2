@@ -241,7 +241,8 @@ def get_project_by_id(project_id, token):
 
 def exists_price_project_by_id(project_id, token):
     headers = {'Authorization': token}
-    api_url = f"http://{PRICES_MODULE_HOST}:{PRICES_MODULE_PORT}" + PRICES_MODULE_API_EXISTS + '/' + str(project_id)
+    api_url = "http://"+ PRICES_MODULE_HOST +":"+ str(PRICES_MODULE_PORT) + PRICES_MODULE_API_EXISTS + '/' + str(project_id)
+    print(api_url)
     rv = requests.get(api_url, headers=headers)
     if rv.status_code == 200:
         return json.loads(rv.text)
