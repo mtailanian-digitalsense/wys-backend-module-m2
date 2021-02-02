@@ -519,6 +519,7 @@ def save_workspaces():
     if request.is_json:
         data = request.json
         token = request.headers.get('Authorization', None)
+        pp.pprint(token)
         print('hola')
         try:
             print('hola1')
