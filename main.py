@@ -516,6 +516,7 @@ def save_workspaces():
             description: "Server error"
     """
     pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(data)
     if request.is_json:
         data = request.json
         pp.pprint(data['project_id'])
