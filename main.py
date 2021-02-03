@@ -516,18 +516,13 @@ def save_workspaces():
           500:
             description: "Server error"
     """
-    pp = pprint.PrettyPrinter(indent=4)
     if request.is_json:
         data = request.json
-
         token = request.headers.get('Authorization', None)
-        print('hola')
         try:
-            print('hola1')
             project = get_project_by_id(data['project_id'], token)
             
             if(project is not None):
-                print('hola3')
                 m2_gen = M2Generated.query.filter_by(project_id=project['id']).first()
                 if m2_gen is not None:
                     db.session.delete(m2_gen)
@@ -551,16 +546,12 @@ def save_workspaces():
 
                 db.session.add(m2_gen)
                 db.session.commit()
-                pp.pprint(m2_gen)
                 project = update_project_by_id(data['project_id'], {'m2_gen_id': m2_gen.id}, token)
-                pp.pprint(project)
                 if project is not None:
                   project['m2_generated_data'] = m2_gen.to_dict()
                   prices_project = exists_price_project_by_id(data['project_id'],token) 
-                  pp.pprint(prices_project['status'])
                   if prices_project['status'] == 'Yes':
                     prices_project = update_prices_project_by_id(data['project_id'],data['area'],token)
-                    pp.pprint(prices_project)
                   return jsonify(project), 201
                 return "Cannot update the Project because doesn't exist", 404    
             else:
@@ -608,6 +599,42 @@ def get_m2_config_by_project_id(project_id):
                 raise Exception("This Project doesn't have a workspaces configuration created")
         
         raise Exception("Project doesn't exist")
+    except SQLAlchemyError as e:
+      return f'Error getting data: {e}', 500
+    except Exception as exp:
+      msg = f"Error: mesg ->{exp}"
+      app.logger.error(msg)
+      return msg, 404
+
+@app.route('/api/m2/data/<m2_gen_id>', methods = ['GET'])
+@token_required
+def get_m2_by_m2_gen_id(m2_gen_id):
+    """
+        Get m2 of M2 module by m2 gen ID from Projects module.
+        ---
+        parameters:
+          - in: path
+            name: m2_gen_id
+            type: integer
+            description: M2 Gen Id
+        tags:
+        - "M2"
+        responses:
+          200:
+            description: m2 information.
+          404:
+            description: Record Not Found.
+          500:
+            description: "Database error"
+    """
+    try:
+        token = request.headers.get('Authorization', None)
+        
+        m2_generated = M2Generated.query.filter_by(id=m2_gen_id).first()
+        if m2_generated is not None:
+          return jsonify({'m2': m2_generated.area}), 200
+        else:
+          raise Exception("This Project doesn't have a m2 configuration created")
     except SQLAlchemyError as e:
       return f'Error getting data: {e}', 500
     except Exception as exp:
