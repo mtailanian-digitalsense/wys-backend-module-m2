@@ -1,8 +1,4 @@
-import jwt
-import requests
-import json
-import math
-import pprint
+import jwt, requests, json, math
 from lib import app, os, db, abort, jsonify, request, num_private_office, total_open_plan, num_formal_collaborative, num_informal_collaborative, num_phonebooth, area_calc, M2InternalConfigVar
 from flask_swagger import swagger
 from flask_swagger_ui import get_swaggerui_blueprint
@@ -13,21 +9,37 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.exc import SQLAlchemyError
 
 # Loading Config Parameters
+"""Config Parameters"""
 APP_HOST = os.getenv('APP_HOST', '127.0.0.1')
+"""Config Parameters"""
 APP_PORT = os.getenv('APP_PORT', 5001)
+"""Config Parameters"""
+
+
 SPACES_MODULE_HOST = os.getenv('SPACES_MODULE_IP', '127.0.0.1')
+""" Connect with spaces module"""
 SPACES_MODULE_PORT = os.getenv('SPACES_MODULE_PORT', 5002)
+""" Connect with spaces module"""
 SPACES_MODULE_API_CREATE = os.getenv('SPACES_MODULE_API_CREATE', '/api/spaces/create')
+""" Connect with spaces module"""
 
 PRICES_MODULE_HOST = os.getenv('PRICES_MODULE_HOST', '127.0.0.1')
+""" Connect with prices module"""
 PRICES_MODULE_PORT = os.getenv('PRICES_MODULE_PORT', 5008)
+""" Connect with prices module"""
 PRICES_MODULE_API = os.getenv('PRICES_MODULE_API', '/api/prices/')
+""" Connect with prices module"""
 PRICES_MODULE_API_EXISTS = os.getenv('PRICES_MODULE_API_EXISTS', '/api/prices/exists')
+""" Connect with prices module"""
 
 PROJECTS_MODULE_HOST = os.getenv('PROJECTS_MODULE_HOST', '127.0.0.1')
+""" Connect with projects module"""
 PROJECTS_MODULE_PORT = os.getenv('PROJECTS_MODULE_PORT', 5000)
+""" Connect with projects module"""
 PROJECTS_MODULE_API = os.getenv('PROJECTS_MODULE_API', '/api/projects/')
+""" Connect with projects module"""
 PROJECTS_URL = f"http://{PROJECTS_MODULE_HOST}:{PROJECTS_MODULE_PORT}"
+""" Connect with projects module"""
 
 CORS(app)
 

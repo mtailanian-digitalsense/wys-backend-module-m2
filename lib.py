@@ -8,7 +8,7 @@ import os
 # Loading Config Parameters
 DB_USER = os.getenv('DB_USER', 'wys')
 DB_PASS = os.getenv('DB_PASSWORD', 'rac3e/07')
-DB_IP = os.getenv('DB_IP_ADDRESS', '10.2.19.195')
+DB_IP = os.getenv('DB_IP_ADDRESS', '10.2.14.195')
 DB_PORT = os.getenv('DB_PORT', '3307')
 DB_SCHEMA = os.getenv('DB_SCHEMA', 'wys')
 
