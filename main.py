@@ -304,10 +304,12 @@ def token_required(f):
                               algorithms=['RS256'], audience="1")
             user_id: int = data['user_id']
             request.environ['user_id'] = user_id
+        except jwt.ExpiredSignature:
+            return jsonify({'message': 'token is expired'}), 401
         except Exception as err:
-            return jsonify({'message': 'token is invalid', 'error': err})
+            return jsonify({'message': 'token is invalid', 'error': err}),401
         except KeyError as kerr:
-            return jsonify({'message': 'Can\'t find user_id in token', 'error': kerr})
+            return jsonify({'message': 'Can\'t find user_id in token', 'error': kerr}),401
 
         return f(*args, **kwargs)
 
