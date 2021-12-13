@@ -438,6 +438,7 @@ def generate_workspaces():
               quantity, obs = obs_and_quantity_calculator(category_name, subcategory, hotdesking_level, grade_of_collaboration, workers_number, area)
               if category_name == "Puestos Trabajo":
                 subcategory['spaces'][1]['quantity'] = quantity
+                subcategory['spaces'] = subcategory['spaces'][::-1]
               else:
                 subcategory['spaces'][0]['quantity'] = quantity
 
