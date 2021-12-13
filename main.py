@@ -436,7 +436,11 @@ def generate_workspaces():
               for space in subcategory['spaces']:
                 space['quantity'] = 0
               quantity, obs = obs_and_quantity_calculator(category_name, subcategory, hotdesking_level, grade_of_collaboration, workers_number, area)
-              subcategory['spaces'][0]['quantity'] = quantity
+              if category_name == "Puestos Trabajo":
+                subcategory['spaces'][1]['quantity'] = quantity
+              else:
+                subcategory['spaces'][0]['quantity'] = quantity
+
               subcategory['observation'] = obs
         data['workspaces'] = workspaces
         return jsonify(data), 200
