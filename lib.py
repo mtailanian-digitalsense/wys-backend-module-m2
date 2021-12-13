@@ -121,7 +121,7 @@ def total_open_plan(hotdesking, workers_number):
 
 def total_individual_spaces(hotdesking, workers_number):
     """
-    Calc the number of the total individul desks given hotdesking level and number of workers
+    Calc the number of the total individual desks, with given hotdesking level and number of workers
     :param hotdesking: Integer number between 70 and 100
     :param workers_number: Integer number between 0 to 1000
     :return: the number of total individual desks according to the given parameters
